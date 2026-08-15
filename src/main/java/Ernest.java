@@ -1,10 +1,19 @@
 public class Ernest {
     public static void main(String[] args) {
-        String banner = " _____ ____  __   __  ____  ____ _____ \n"
-                      + "| ____|  _ \\| \\   | | ____|/ ___|_   _|\n"
-                      + "|  _| | |_) || \\  | |  _|  \\___\\  | |\n"
-                      + "| |___|  _ <| | \\ | | |___ ___) || |\n"
-                      + "|_____|_| \\ |_|  \\|_|_____||____/ |_|\n";
+        String h_line = "______________________________________";
+        String banner = " _____ ____  _     _  ____  ____ _____\n"
+                + "| ____|  _ \\| \\   | | ____|/ ___|_   _|\n"
+                + "|  _| | |_) |  \\  | |  _|  \\___\\  | |\n"
+                + "| |___|  _ /| | \\ | | |___ ___) | | |\n"
+                + "|_____|_| \\ |_|  \\|_|_____||____/ |_|\n";
+        String chatbot_name = "Ernest";
+
+        System.out.println(h_line);
         System.out.println(banner);
+        System.out.printf("Hi! I'm %s.\n", chatbot_name);
+        System.out.println("How can I help you?");
+        System.out.println(h_line);
+        System.out.println("Bye. See you again soon!");
+        System.out.println(h_line);
     }
 }
