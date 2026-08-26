@@ -19,7 +19,7 @@ public class Ernest {
         System.out.println("(Type \"bye\" to exit the chat)");
 
         // Input, Outputs and Arrays
-        ArrayList<String> dataList = new ArrayList<>(100);
+        ArrayList<Task> tasksList = new ArrayList<>(100);
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
@@ -32,15 +32,18 @@ public class Ernest {
                 } else if (command.equalsIgnoreCase("list")) {
                     // Print list
                     System.out.println("Your to-do list is:");
-                    for (int i = 0; i < dataList.size(); i++) {
-                        System.out.println((i + 1) + ". " + dataList.get(i));
+                    for (int i = 0; i < tasksList.size(); i++) {
+                        String taskName = tasksList.get(i).getTaskName();
+                        String isDone = (tasksList.get(i).getDone() ? "[X]" : "[ ]");
+                        System.out.println((i + 1) + ". " + isDone + " " + taskName);
                     }
                 } else {
                     // Add entered text into dataList
-                    if (dataList.size() < 100) {
-                        dataList.add(command);
+                    if (tasksList.size() < 100) {
+                        Task newTask = new Task(command);
+                        tasksList.add(newTask);
                         System.out.println("Added to list: " + command);
-                        System.out.println("Current list size: " + dataList.size() + "/100");
+                        System.out.println("Current list size: " + tasksList.size() + "/100");
                     } else {
                         System.out.println("The list is full (100/100).");
                     }
