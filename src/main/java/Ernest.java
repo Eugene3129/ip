@@ -42,13 +42,17 @@ public class Ernest {
                         int taskNumber = Integer.parseInt(command.substring(5).strip());
 
                         if (taskNumber >= 1 && taskNumber <= tasksList.size()) {
-                            tasksList.get(taskNumber - 1).setDone(true);
-                            System.out.println("Well done! Marked task " + taskNumber + " as done.");
+                            if (tasksList.get(taskNumber - 1).getDone() == false) {
+                                tasksList.get(taskNumber - 1).setDone(true);
+                                System.out.println("Well done! Marked task " + taskNumber + " as done.");
+                            } else {
+                                System.out.println("Sorry, task " + taskNumber + " is already done.");
+                            }
                         } else {
                             System.out.println("Invalid task number.");
                         }
                     } catch (NumberFormatException e) {
-                        System.out.println("Usage: done <task number>");
+                        System.out.println("Usage: mark <task number>");
                     }
                 } else {
                     // Add entered text into dataList
