@@ -54,6 +54,23 @@ public class Ernest {
                     } catch (NumberFormatException e) {
                         System.out.println("Usage: mark <task number>");
                     }
+                }  else if (command.toLowerCase().startsWith("unmark ")) {
+                    try {
+                        int taskNumber = Integer.parseInt(command.substring(7).strip());
+
+                        if (taskNumber >= 1 && taskNumber <= tasksList.size()) {
+                            if (tasksList.get(taskNumber - 1).getDone() == true) {
+                                tasksList.get(taskNumber - 1).setDone(false);
+                                System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
+                            } else {
+                                System.out.println("Sorry, task " + taskNumber + " is already marked as not done yet.");
+                            }
+                        } else {
+                            System.out.println("Invalid task number.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Usage: unmark <task number>");
+                    }
                 } else {
                     // Add entered text into dataList
                     if (tasksList.size() < 100) {

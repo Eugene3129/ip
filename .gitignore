@@ -20,6 +20,7 @@ bin/
 
 # Temporary and test-generated files
 _temp/
+*.html
 *.log
 
 # Dependencies fetched by Node.js package managers
