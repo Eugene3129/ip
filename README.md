@@ -13,7 +13,7 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    2.3. If there are any further prompts, accept the defaults.
 3. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
    In the same dialog, set the **Project language level** field to the `SDK default` option.
-4. After that, locate the `src/main/java/Ernest.java` file, right-click it, and choose `Run Ernest.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, you should see something like the below as the output:
+4. After that, locate the `src/main/java/ernest/Ernest.java` file, right-click it, and choose `Run Ernest.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, you should see something like the below as the output:
    ```
     _____ ____   _      _ _____ ____ _____ 
    | ____|  _ \\| \\   | | ____/ ___|_   _|
