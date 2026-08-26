@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Ernest {
@@ -17,16 +18,33 @@ public class Ernest {
         System.out.println(h_line);
         System.out.println("(Type \"bye\" to exit the chat)");
 
+        // Input, Outputs and Arrays
+        ArrayList<String> dataList = new ArrayList<>(100);
+
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
                 System.out.print("> ");
                 String command = scanner.nextLine();
 
                 if (command.equalsIgnoreCase("bye")) {
+                    // Exit the chatbot
                     break;
+                } else if (command.equalsIgnoreCase("list")) {
+                    // Print list
+                    System.out.println("Your to-do list is:");
+                    for (int i = 0; i < dataList.size(); i++) {
+                        System.out.println((i + 1) + ". " + dataList.get(i));
+                    }
+                } else {
+                    // Add entered text into dataList
+                    if (dataList.size() < 100) {
+                        dataList.add(command);
+                        System.out.println("Added to list: " + command);
+                        System.out.println("Current list size: " + dataList.size() + "/100");
+                    } else {
+                        System.out.println("The list is full (100/100).");
+                    }
                 }
-
-                System.out.println(command); // Echo the user's command
             }
         }
 
