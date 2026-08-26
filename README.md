@@ -26,5 +26,5 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 
 ## Reused code citations
 Used Codex for the following:
-   - Ask general questions
+   - Ask general questions during most of my coding
    - Generate an ASCII-art banner for the chatbot name, then I manually edited it

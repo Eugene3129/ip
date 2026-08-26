@@ -37,6 +37,19 @@ public class Ernest {
                         String isDone = (tasksList.get(i).getDone() ? "[X]" : "[ ]");
                         System.out.println((i + 1) + ". " + isDone + " " + taskName);
                     }
+                } else if (command.toLowerCase().startsWith("mark ")) {
+                    try {
+                        int taskNumber = Integer.parseInt(command.substring(5).strip());
+
+                        if (taskNumber >= 1 && taskNumber <= tasksList.size()) {
+                            tasksList.get(taskNumber - 1).setDone(true);
+                            System.out.println("Well done! Marked task " + taskNumber + " as done.");
+                        } else {
+                            System.out.println("Invalid task number.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Usage: done <task number>");
+                    }
                 } else {
                     // Add entered text into dataList
                     if (tasksList.size() < 100) {
