@@ -35,6 +35,15 @@ Non-trivial commits must explain what changed and why, separated from the
 subject by a blank line. Use meaningful kebab-case branch names. Keep the
 existing requirement that commits and pushes require explicit authorization.
 
+## Java coding standard:
+
+All Java code in this project must follow the project-specific
+`.codex/skills/seedu-java-coding-standard/SKILL.md`, which is based on the
+[SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/intermediate.html).
+Apply it when creating, editing, reviewing, or refactoring Java code. In
+particular, keep packages, source directories, names, imports, formatting,
+braces, visibility, and required Javadocs consistent with that skill.
+
 ## Java version:
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
