@@ -106,6 +106,11 @@ public class TaskList {
     public static void addTask(String taskCommand, ArrayList<Task> tasks) {
         if (tasks.size() < MAX_TASKS) {
             Task task = createTask(taskCommand);
+            if (task == null) {
+                System.out.println("Sorry, please insert a valid command.");
+                return;
+            }
+
             tasks.add(task);
             System.out.println("Added to task list:\n> " + task.toString());
             System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
@@ -122,12 +127,21 @@ public class TaskList {
      */
     private static Task createTask(String taskCommand) {
         if (taskCommand.startsWith(DEADLINE_PREFIX)) {
+            if (taskCommand.indexOf(DEADLINE_MARKER) < 0) {
+                return null;
+            }
             return createDeadline(taskCommand);
         } else if (taskCommand.startsWith(EVENT_PREFIX)) {
+            int fromMarker = taskCommand.indexOf(EVENT_FROM_MARKER);
+            int toMarker = taskCommand.indexOf(EVENT_TO_MARKER);
+            if (fromMarker < 0 || toMarker <= fromMarker) {
+                return null;
+            }
             return createEvent(taskCommand);
-        } else {
+        } else if (taskCommand.startsWith(TODO_PREFIX)) {
             return createToDo(taskCommand);
         }
+        return null;
     }
 
     /**

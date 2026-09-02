@@ -148,6 +148,38 @@ Bye. See you again soon!
 ______________________________________
 ```
 
+## Test case: Reject malformed task commands
+
+Aim: Verify that Ernest reports an invalid command instead of crashing when a deadline or event command omits its slash marker.
+
+Inputs:
+```text
+deadline submit assignment by Friday
+event team meeting from 10am to 11am
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Sorry, please insert a valid command.
+______________________________________
+Sorry, please insert a valid command.
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
 ## Test case: Add and list a deadline
 
 Aim: Verify that a deadline command stores the task description and due date, and `list` displays both values.
