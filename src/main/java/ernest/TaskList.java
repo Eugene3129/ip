@@ -9,6 +9,12 @@ public class TaskList {
     // Creation of TaskList inspired by peilingggg, but code is my own work
     /** Maximum number of tasks that Ernest can store. */
     private static final int MAX_TASKS = 100;
+    private static final String TODO_PREFIX = "todo ";
+    private static final String DEADLINE_PREFIX = "deadline ";
+    private static final String EVENT_PREFIX = "event ";
+    private static final String DEADLINE_MARKER = "/by";
+    private static final String EVENT_FROM_MARKER = "/from";
+    private static final String EVENT_TO_MARKER = "/to";
 
     /** Tasks currently stored in this list. */
     protected ArrayList<Task> tasks;
@@ -115,9 +121,9 @@ public class TaskList {
      * @return task represented by the command.
      */
     private static Task createTask(String taskCommand) {
-        if (taskCommand.startsWith("deadline ")) {
+        if (taskCommand.startsWith(DEADLINE_PREFIX)) {
             return createDeadline(taskCommand);
-        } else if (taskCommand.startsWith("event ")) {
+        } else if (taskCommand.startsWith(EVENT_PREFIX)) {
             return createEvent(taskCommand);
         } else {
             return createToDo(taskCommand);
@@ -131,9 +137,9 @@ public class TaskList {
      * @return deadline represented by the command.
      */
     private static Deadline createDeadline(String taskCommand) {
-        int deadlineMarker = taskCommand.indexOf("/by");
-        String taskName = taskCommand.substring(9, deadlineMarker).strip();
-        String deadline = taskCommand.substring(deadlineMarker + 4).strip();
+        int deadlineMarker = taskCommand.indexOf(DEADLINE_MARKER);
+        String taskName = taskCommand.substring(DEADLINE_PREFIX.length(), deadlineMarker).strip();
+        String deadline = taskCommand.substring(deadlineMarker + DEADLINE_MARKER.length()).strip();
         return new Deadline(taskName, deadline);
     }
 
@@ -144,11 +150,12 @@ public class TaskList {
      * @return event represented by the command.
      */
     private static Event createEvent(String taskCommand) {
-        int fromMarker = taskCommand.indexOf("/from");
-        int toMarker = taskCommand.indexOf("/to");
-        String taskName = taskCommand.substring(6, fromMarker).strip();
-        String durationStart = taskCommand.substring(fromMarker + 6, toMarker - 1).strip();
-        String durationEnd = taskCommand.substring(toMarker + 4).strip();
+        int fromMarker = taskCommand.indexOf(EVENT_FROM_MARKER);
+        int toMarker = taskCommand.indexOf(EVENT_TO_MARKER);
+        String taskName = taskCommand.substring(EVENT_PREFIX.length(), fromMarker).strip();
+        String durationStart = taskCommand.substring(fromMarker + EVENT_FROM_MARKER.length(), toMarker)
+                .strip();
+        String durationEnd = taskCommand.substring(toMarker + EVENT_TO_MARKER.length()).strip();
         return new Event(taskName, durationStart, durationEnd);
     }
 
@@ -159,7 +166,7 @@ public class TaskList {
      * @return to-do task represented by the command.
      */
     private static ToDo createToDo(String taskCommand) {
-        String taskName = taskCommand.substring(taskCommand.indexOf("todo") + 5).strip();
+        String taskName = taskCommand.substring(TODO_PREFIX.length()).strip();
         return new ToDo(taskName);
     }
 
