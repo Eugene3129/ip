@@ -2,14 +2,21 @@ package ernest;
 
 import java.util.ArrayList;
 
+/**
+ * Stores and manages the tasks in Ernest's to-do list.
+ */
 public class TaskList {
     // Creation of TaskList inspired by peilingggg, but code is my own work
     /** Maximum number of tasks that Ernest can store. */
     private static final int MAX_TASKS = 100;
 
+    /** Tasks currently stored in this list. */
     protected ArrayList<Task> tasks;
 
-    public TaskList(){
+    /**
+     * Creates an empty task list.
+     */
+    public TaskList() {
         this.tasks = new ArrayList<>();
     }
 
@@ -101,6 +108,12 @@ public class TaskList {
         }
     }
 
+    /**
+     * Creates the task represented by a supported task command.
+     *
+     * @param taskCommand command containing the task type and details.
+     * @return task represented by the command.
+     */
     private static Task createTask(String taskCommand) {
         if (taskCommand.startsWith("deadline ")) {
             return createDeadline(taskCommand);
@@ -111,6 +124,12 @@ public class TaskList {
         }
     }
 
+    /**
+     * Creates a deadline from a deadline command.
+     *
+     * @param taskCommand deadline command containing a description and due date.
+     * @return deadline represented by the command.
+     */
     private static Deadline createDeadline(String taskCommand) {
         int deadlineMarker = taskCommand.indexOf("/by");
         String taskName = taskCommand.substring(9, deadlineMarker).strip();
@@ -118,6 +137,12 @@ public class TaskList {
         return new Deadline(taskName, deadline);
     }
 
+    /**
+     * Creates an event from an event command.
+     *
+     * @param taskCommand event command containing a description and time range.
+     * @return event represented by the command.
+     */
     private static Event createEvent(String taskCommand) {
         int fromMarker = taskCommand.indexOf("/from");
         int toMarker = taskCommand.indexOf("/to");
@@ -127,11 +152,24 @@ public class TaskList {
         return new Event(taskName, durationStart, durationEnd);
     }
 
+    /**
+     * Creates a to-do task from a to-do command.
+     *
+     * @param taskCommand to-do command containing a description.
+     * @return to-do task represented by the command.
+     */
     private static ToDo createToDo(String taskCommand) {
         String taskName = taskCommand.substring(taskCommand.indexOf("todo") + 5).strip();
         return new ToDo(taskName);
     }
 
+    /**
+     * Returns the task at a valid one-based task number.
+     *
+     * @param taskNumber one-based task number to look up.
+     * @param tasks list containing the available tasks.
+     * @return matching task, or {@code null} when the number is invalid.
+     */
     private static Task getTask(int taskNumber, ArrayList<Task> tasks) {
         if (!isValidTaskNumber(taskNumber, tasks)) {
             return null;

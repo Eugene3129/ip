@@ -1,9 +1,18 @@
 package ernest;
 
+/**
+ * Represents a task that has a due date.
+ */
 public class Deadline extends Task {
 
     protected String by;
 
+    /**
+     * Creates a deadline task.
+     *
+     * @param description description of the task.
+     * @param by due date for the task.
+     */
     public Deadline(String description, String by) {
         super(description);
         this.by = by;
