@@ -11,8 +11,7 @@ public class Task {
      * Creates an empty, incomplete task.
      */
     public Task() {
-        this.taskName = "";
-        this.isDone = false;
+        this("");
     }
 
     /**
