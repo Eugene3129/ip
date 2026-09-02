@@ -90,29 +90,44 @@ public class TaskList {
      */
     public static void addTask(String taskCommand, ArrayList<Task> tasks) {
         if (tasks.size() < MAX_TASKS) {
-            Task task;
-            String taskName;
-            // Commands are filtered out to be deadline, event or todo
-            if (taskCommand.startsWith("deadline ")) {
-                taskName = taskCommand.substring(9, taskCommand.indexOf("/by")).strip();
-                String deadline = taskCommand.substring(taskCommand.indexOf("/by") + 4).strip();
-                task = new Deadline(taskName, deadline);
-            } else if (taskCommand.startsWith("event ")) {
-                taskName = taskCommand.substring(6, taskCommand.indexOf("/from")).strip();
-                String duration_start = taskCommand.substring(taskCommand.indexOf("/from") + 6,
-                                        taskCommand.indexOf("/to") - 1).strip();
-                String duration_end = taskCommand.substring(taskCommand.indexOf("/to") + 4).strip();
-                task = new Event(taskName, duration_start, duration_end);
-            } else { // If task is todo
-                taskName = taskCommand.substring(taskCommand.indexOf("todo") + 5).strip();
-                task = new ToDo(taskName);
-            }
+            Task task = createTask(taskCommand);
             tasks.add(task);
             System.out.println("Added to task list:\n> " + task.toString());
             System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
         } else {
             System.out.println("The list is full (" + MAX_TASKS + "/" + MAX_TASKS + ").");
         }
+    }
+
+    private static Task createTask(String taskCommand) {
+        if (taskCommand.startsWith("deadline ")) {
+            return createDeadline(taskCommand);
+        } else if (taskCommand.startsWith("event ")) {
+            return createEvent(taskCommand);
+        } else {
+            return createToDo(taskCommand);
+        }
+    }
+
+    private static Deadline createDeadline(String taskCommand) {
+        int deadlineMarker = taskCommand.indexOf("/by");
+        String taskName = taskCommand.substring(9, deadlineMarker).strip();
+        String deadline = taskCommand.substring(deadlineMarker + 4).strip();
+        return new Deadline(taskName, deadline);
+    }
+
+    private static Event createEvent(String taskCommand) {
+        int fromMarker = taskCommand.indexOf("/from");
+        int toMarker = taskCommand.indexOf("/to");
+        String taskName = taskCommand.substring(6, fromMarker).strip();
+        String durationStart = taskCommand.substring(fromMarker + 6, toMarker - 1).strip();
+        String durationEnd = taskCommand.substring(toMarker + 4).strip();
+        return new Event(taskName, durationStart, durationEnd);
+    }
+
+    private static ToDo createToDo(String taskCommand) {
+        String taskName = taskCommand.substring(taskCommand.indexOf("todo") + 5).strip();
+        return new ToDo(taskName);
     }
 
     /**
