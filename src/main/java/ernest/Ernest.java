@@ -56,25 +56,41 @@ public final class Ernest {
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
-                String normalizedCommand = command.toLowerCase(Locale.ROOT);
 
-                if (command.equalsIgnoreCase("bye")) {
+                if (!processCommand(command, taskList)) {
                     break;
-                } else if (command.equalsIgnoreCase("list")) {
-                    TaskList.listTasks(taskList.tasks);
-                } else if (normalizedCommand.startsWith("mark ")) {
-                    TaskList.markTask(command, taskList.tasks);
-                } else if (normalizedCommand.startsWith("unmark ")) {
-                    TaskList.unmarkTask(command, taskList.tasks);
-                } else if (normalizedCommand.startsWith("todo ") ||
-                        normalizedCommand.startsWith("deadline ") ||
-                        normalizedCommand.startsWith("event ")) {
-                    TaskList.addTask(command, taskList.tasks);
-                } else {
-                    System.out.println("Sorry, please insert a valid command.");
                 }
-                System.out.println(HORIZONTAL_LINE);
             }
         }
+    }
+
+    /**
+     * Processes one command and prints the corresponding response.
+     *
+     * @param command command entered by the user.
+     * @param taskList task list to update or display.
+     * @return false when the command ends the chat; otherwise true.
+     */
+    private static boolean processCommand(String command, TaskList taskList) {
+        String normalizedCommand = command.toLowerCase(Locale.ROOT);
+
+        if (command.equalsIgnoreCase("bye")) {
+            return false;
+        } else if (command.equalsIgnoreCase("list")) {
+            TaskList.listTasks(taskList.tasks);
+        } else if (normalizedCommand.startsWith("mark ")) {
+            TaskList.markTask(command, taskList.tasks);
+        } else if (normalizedCommand.startsWith("unmark ")) {
+            TaskList.unmarkTask(command, taskList.tasks);
+        } else if (normalizedCommand.startsWith("todo ")
+                || normalizedCommand.startsWith("deadline ")
+                || normalizedCommand.startsWith("event ")) {
+            TaskList.addTask(command, taskList.tasks);
+        } else {
+            System.out.println("Sorry, please insert a valid command.");
+        }
+
+        System.out.println(HORIZONTAL_LINE);
+        return true;
     }
 }
