@@ -36,19 +36,20 @@ public class TaskList {
     public static void markTask(String command, ArrayList<Task> tasks) {
         try {
             int taskNumber = Integer.parseInt(command.substring(5).strip());
+            Task task = getTask(taskNumber, tasks);
 
-            if (isValidTaskNumber(taskNumber, tasks)) {
-                Task task = tasks.get(taskNumber - 1);
-
-                if (!task.isDone()) {
-                    task.setDone(true);
-                    System.out.println("Well done! Marked task " + taskNumber + " as done.");
-                } else {
-                    System.out.println("Sorry, task " + taskNumber + " is already done.");
-                }
-            } else {
+            if (task == null) {
                 System.out.println("Invalid task number.");
+                return;
             }
+
+            if (task.isDone()) {
+                System.out.println("Sorry, task " + taskNumber + " is already done.");
+                return;
+            }
+
+            task.setDone(true);
+            System.out.println("Well done! Marked task " + taskNumber + " as done.");
         } catch (NumberFormatException exception) {
             System.out.println("Usage: mark <task number>");
         }
@@ -63,20 +64,21 @@ public class TaskList {
     public static void unmarkTask(String command, ArrayList<Task> tasks) {
         try {
             int taskNumber = Integer.parseInt(command.substring(7).strip());
+            Task task = getTask(taskNumber, tasks);
 
-            if (isValidTaskNumber(taskNumber, tasks)) {
-                Task task = tasks.get(taskNumber - 1);
-
-                if (task.isDone()) {
-                    task.setDone(false);
-                    System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
-                } else {
-                    System.out.println("Sorry, task " + taskNumber
-                            + " is already marked as not done yet.");
-                }
-            } else {
+            if (task == null) {
                 System.out.println("Invalid task number.");
+                return;
             }
+
+            if (!task.isDone()) {
+                System.out.println("Sorry, task " + taskNumber
+                        + " is already marked as not done yet.");
+                return;
+            }
+
+            task.setDone(false);
+            System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
         } catch (NumberFormatException exception) {
             System.out.println("Usage: unmark <task number>");
         }
@@ -128,6 +130,13 @@ public class TaskList {
     private static ToDo createToDo(String taskCommand) {
         String taskName = taskCommand.substring(taskCommand.indexOf("todo") + 5).strip();
         return new ToDo(taskName);
+    }
+
+    private static Task getTask(int taskNumber, ArrayList<Task> tasks) {
+        if (!isValidTaskNumber(taskNumber, tasks)) {
+            return null;
+        }
+        return tasks.get(taskNumber - 1);
     }
 
     /**
