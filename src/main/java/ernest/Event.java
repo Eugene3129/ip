@@ -4,8 +4,10 @@ package ernest;
  * Represents a task that occurs within a time range.
  */
 public class Event extends Task {
-    protected String durationStart;
-    protected String durationEnd;
+    /** Start of the event. */
+    private final String durationStart;
+    /** End of the event. */
+    private final String durationEnd;
 
     /**
      * Creates an event task.

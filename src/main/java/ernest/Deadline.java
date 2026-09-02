@@ -5,7 +5,8 @@ package ernest;
  */
 public class Deadline extends Task {
 
-    protected String by;
+    /** Due date associated with this task. */
+    private final String by;
 
     /**
      * Creates a deadline task.
