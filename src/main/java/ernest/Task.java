@@ -6,6 +6,7 @@ package ernest;
 public class Task {
     private String taskName;
     private boolean isDone;
+    private String status;
 
     /**
      * Creates an empty, incomplete task.
@@ -13,6 +14,7 @@ public class Task {
     public Task() {
         this.taskName = "";
         this.isDone = false;
+        this.status = "[ ]";
     }
 
     /**
@@ -23,21 +25,20 @@ public class Task {
     public Task(String taskName) {
         this.taskName = taskName;
         this.isDone = false;
+        this.status = "[ ]";
     }
 
-    public String getTaskName() {
-        return taskName;
-    }
-
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
+    @Override
+    public String toString() {
+        return this.status + " " + this.taskName;
     }
 
     public boolean isDone() {
-        return isDone;
+        return this.isDone;
     }
 
     public void setDone(boolean isDone) {
         this.isDone = isDone;
+        this.status = this.isDone() ? "[X]" : "[ ]";
     }
 }

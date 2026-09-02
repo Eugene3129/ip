@@ -1,6 +1,5 @@
 package ernest;
 
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -8,9 +7,6 @@ import java.util.Scanner;
  * Runs Ernest, a simple command-line task manager.
  */
 public final class Ernest {
-    /** Maximum number of tasks that Ernest can store. */
-    private static final int MAX_TASKS = 100;
-
     /** Line used to separate sections of the command-line interface. */
     private static final String HORIZONTAL_LINE = "______________________________________";
 
@@ -56,124 +52,29 @@ public final class Ernest {
      * Reads and processes commands until the user exits or input ends.
      */
     private static void runChat() {
-        ArrayList<Task> tasks = new ArrayList<>(MAX_TASKS);
-
+        TaskList taskList = new TaskList();
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
-                System.out.print("> ");
                 String command = scanner.nextLine();
                 String normalizedCommand = command.toLowerCase(Locale.ROOT);
 
                 if (command.equalsIgnoreCase("bye")) {
                     break;
                 } else if (command.equalsIgnoreCase("list")) {
-                    listTasks(tasks);
+                    TaskList.listTasks(taskList.tasks);
                 } else if (normalizedCommand.startsWith("mark ")) {
-                    markTask(command, tasks);
+                    TaskList.markTask(command, taskList.tasks);
                 } else if (normalizedCommand.startsWith("unmark ")) {
-                    unmarkTask(command, tasks);
+                    TaskList.unmarkTask(command, taskList.tasks);
+                } else if (normalizedCommand.startsWith("todo ") ||
+                        normalizedCommand.startsWith("deadline ") ||
+                        normalizedCommand.startsWith("event ")) {
+                    TaskList.addTask(command, taskList.tasks);
                 } else {
-                    addTask(command, tasks);
+                    System.out.println("Sorry, please insert a valid command.");
                 }
+                System.out.println(HORIZONTAL_LINE);
             }
         }
-    }
-
-    /**
-     * Prints all tasks and their completion status.
-     *
-     * @param tasks tasks to print.
-     */
-    private static void listTasks(ArrayList<Task> tasks) {
-        System.out.println("Your to-do list is:");
-
-        for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            String status = task.isDone() ? "[X]" : "[ ]";
-            System.out.println((i + 1) + ". " + status + " " + task.getTaskName());
-        }
-    }
-
-    /**
-     * Marks a task as done when the command contains a valid task number.
-     *
-     * @param command mark command entered by the user.
-     * @param tasks tasks that can be marked.
-     */
-    private static void markTask(String command, ArrayList<Task> tasks) {
-        try {
-            int taskNumber = Integer.parseInt(command.substring(5).strip());
-
-            if (isValidTaskNumber(taskNumber, tasks)) {
-                Task task = tasks.get(taskNumber - 1);
-
-                if (!task.isDone()) {
-                    task.setDone(true);
-                    System.out.println("Well done! Marked task " + taskNumber + " as done.");
-                } else {
-                    System.out.println("Sorry, task " + taskNumber + " is already done.");
-                }
-            } else {
-                System.out.println("Invalid task number.");
-            }
-        } catch (NumberFormatException exception) {
-            System.out.println("Usage: mark <task number>");
-        }
-    }
-
-    /**
-     * Marks a task as not done when the command contains a valid task number.
-     *
-     * @param command unmark command entered by the user.
-     * @param tasks tasks that can be unmarked.
-     */
-    private static void unmarkTask(String command, ArrayList<Task> tasks) {
-        try {
-            int taskNumber = Integer.parseInt(command.substring(7).strip());
-
-            if (isValidTaskNumber(taskNumber, tasks)) {
-                Task task = tasks.get(taskNumber - 1);
-
-                if (task.isDone()) {
-                    task.setDone(false);
-                    System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
-                } else {
-                    System.out.println("Sorry, task " + taskNumber
-                            + " is already marked as not done yet.");
-                }
-            } else {
-                System.out.println("Invalid task number.");
-            }
-        } catch (NumberFormatException exception) {
-            System.out.println("Usage: unmark <task number>");
-        }
-    }
-
-    /**
-     * Adds a new task when the task list has available space.
-     *
-     * @param taskName task description entered by the user.
-     * @param tasks list to which the new task is added.
-     */
-    private static void addTask(String taskName, ArrayList<Task> tasks) {
-        if (tasks.size() < MAX_TASKS) {
-            Task task = new Task(taskName);
-            tasks.add(task);
-            System.out.println("Added to list: " + taskName);
-            System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
-        } else {
-            System.out.println("The list is full (" + MAX_TASKS + "/" + MAX_TASKS + ").");
-        }
-    }
-
-    /**
-     * Checks whether a one-based task number identifies a task in the list.
-     *
-     * @param taskNumber one-based task number to check.
-     * @param tasks list containing the available tasks.
-     * @return true if the number identifies a task; otherwise false.
-     */
-    private static boolean isValidTaskNumber(int taskNumber, ArrayList<Task> tasks) {
-        return taskNumber >= 1 && taskNumber <= tasks.size();
     }
 }
