@@ -48,6 +48,23 @@ braces, visibility, and required Javadocs consistent with that skill.
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
 
+## UI testing after code updates:
+
+After every code update, review `test/ui-test-plan.md` before considering the
+change complete. If the update changes observable command-line behavior, add
+or revise test cases so each affected behavior has an aim, inputs, and the
+complete expected output. Then invoke the project-specific `test-ui` skill
+(`$test-ui`) and run the plan from the repository root:
+
+```powershell
+python .codex/skills/test-ui/scripts/run_ui_tests.py
+```
+
+Do not skip the skill invocation merely because the plan did not need an
+update. Preserve the skill's exact output comparison, console transcript, and
+stop-on-first-failure behavior. Report any failure with the actual and
+expected output before making further code changes.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
