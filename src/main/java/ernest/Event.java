@@ -4,24 +4,24 @@ package ernest;
  * Represents a task that occurs within a time range.
  */
 public class Event extends Task {
-    protected String duration_start;
-    protected String duration_end;
+    protected String durationStart;
+    protected String durationEnd;
 
     /**
      * Creates an event task.
      *
      * @param description description of the task.
-     * @param duration_start start of the event.
-     * @param duration_end end of the event.
+     * @param durationStart start of the event.
+     * @param durationEnd end of the event.
      */
-    public Event(String description, String duration_start, String duration_end) {
+    public Event(String description, String durationStart, String durationEnd) {
         super(description);
-        this.duration_start = duration_start;
-        this.duration_end = duration_end;
+        this.durationStart = durationStart;
+        this.durationEnd = durationEnd;
     }
 
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + duration_start + " to: " + duration_end + ")";
+        return "[E]" + super.toString() + " (from: " + durationStart + " to: " + durationEnd + ")";
     }
 }
