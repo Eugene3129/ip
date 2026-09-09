@@ -1,6 +1,7 @@
 package ernest;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Stores and manages the tasks in Ernest's to-do list.
@@ -15,6 +16,8 @@ public class TaskList {
     private static final String DEADLINE_MARKER = "/by";
     private static final String EVENT_FROM_MARKER = "/from";
     private static final String EVENT_TO_MARKER = "/to";
+    private static final String MARK_COMMAND = "mark";
+    private static final String UNMARK_COMMAND = "unmark";
 
     /** Tasks currently stored in this list. */
     protected ArrayList<Task> tasks;
@@ -47,25 +50,36 @@ public class TaskList {
      * @param tasks tasks that can be marked.
      */
     public static void markTask(String command, ArrayList<Task> tasks) {
-        try {
-            int taskNumber = Integer.parseInt(command.substring(5).strip());
-            Task task = getTask(taskNumber, tasks);
-
-            if (task == null) {
-                System.out.println("Invalid task number.");
-                return;
-            }
-
-            if (task.isDone()) {
-                System.out.println("Sorry, task " + taskNumber + " is already done.");
-                return;
-            }
-
-            task.setDone(true);
-            System.out.println("Well done! Marked task " + taskNumber + " as done.");
-        } catch (NumberFormatException exception) {
-            System.out.println("Usage: mark <task number>");
+        String taskNumberText = getCommandArgument(command, MARK_COMMAND);
+        if (taskNumberText.isEmpty()) {
+            System.out.println("Missing task number. Please refer to the tasks list and "
+                    + "try again.");
+            return;
         }
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException exception) {
+            System.out.println("Task number must be an integer.");
+            return;
+        }
+
+        Task task = getTask(taskNumber, tasks);
+
+        if (task == null) {
+            System.out.println("Invalid task number. Please refer to the tasks list and "
+                    + "try again.");
+            return;
+        }
+
+        if (task.isDone()) {
+            System.out.println("Sorry, task " + taskNumber + " is already done.");
+            return;
+        }
+
+        task.setDone(true);
+        System.out.println("Well done! Marked task " + taskNumber + " as done.");
     }
 
     /**
@@ -75,26 +89,37 @@ public class TaskList {
      * @param tasks tasks that can be unmarked.
      */
     public static void unmarkTask(String command, ArrayList<Task> tasks) {
-        try {
-            int taskNumber = Integer.parseInt(command.substring(7).strip());
-            Task task = getTask(taskNumber, tasks);
-
-            if (task == null) {
-                System.out.println("Invalid task number.");
-                return;
-            }
-
-            if (!task.isDone()) {
-                System.out.println("Sorry, task " + taskNumber
-                        + " is already marked as not done yet.");
-                return;
-            }
-
-            task.setDone(false);
-            System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
-        } catch (NumberFormatException exception) {
-            System.out.println("Usage: unmark <task number>");
+        String taskNumberText = getCommandArgument(command, UNMARK_COMMAND);
+        if (taskNumberText.isEmpty()) {
+            System.out.println("Missing task number. Please refer to the tasks list and "
+                    + "try again.");
+            return;
         }
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException exception) {
+            System.out.println("Task number must be an integer.");
+            return;
+        }
+
+        Task task = getTask(taskNumber, tasks);
+
+        if (task == null) {
+            System.out.println("Invalid task number. Please refer to the tasks list and "
+                    + "try again.");
+            return;
+        }
+
+        if (!task.isDone()) {
+            System.out.println("Sorry, task " + taskNumber
+                    + " is already marked as not done yet.");
+            return;
+        }
+
+        task.setDone(false);
+        System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
     }
 
     /**
@@ -105,9 +130,16 @@ public class TaskList {
      */
     public static void addTask(String taskCommand, ArrayList<Task> tasks) {
         if (tasks.size() < MAX_TASKS) {
-            Task task = createTask(taskCommand);
+            String normalizedTaskCommand = taskCommand.strip().replaceFirst("\\s+", " ");
+            String validationMessage = getTaskValidationMessage(normalizedTaskCommand);
+            if (validationMessage != null) {
+                System.out.println(validationMessage);
+                return;
+            }
+
+            Task task = createTask(normalizedTaskCommand);
             if (task == null) {
-                System.out.println("Sorry, please insert a valid command.");
+                System.out.println("Sorry, please insert a valid task.");
                 return;
             }
 
@@ -126,19 +158,13 @@ public class TaskList {
      * @return task represented by the command.
      */
     private static Task createTask(String taskCommand) {
-        if (taskCommand.startsWith(DEADLINE_PREFIX)) {
-            if (taskCommand.indexOf(DEADLINE_MARKER) < 0) {
-                return null;
-            }
+        String normalizedCommand = taskCommand.toLowerCase(Locale.ROOT);
+
+        if (normalizedCommand.startsWith(DEADLINE_PREFIX)) {
             return createDeadline(taskCommand);
-        } else if (taskCommand.startsWith(EVENT_PREFIX)) {
-            int fromMarker = taskCommand.indexOf(EVENT_FROM_MARKER);
-            int toMarker = taskCommand.indexOf(EVENT_TO_MARKER);
-            if (fromMarker < 0 || toMarker <= fromMarker) {
-                return null;
-            }
+        } else if (normalizedCommand.startsWith(EVENT_PREFIX)) {
             return createEvent(taskCommand);
-        } else if (taskCommand.startsWith(TODO_PREFIX)) {
+        } else if (normalizedCommand.startsWith(TODO_PREFIX)) {
             return createToDo(taskCommand);
         }
         return null;
@@ -151,7 +177,7 @@ public class TaskList {
      * @return deadline represented by the command.
      */
     private static Deadline createDeadline(String taskCommand) {
-        int deadlineMarker = taskCommand.indexOf(DEADLINE_MARKER);
+        int deadlineMarker = findMarker(taskCommand.toLowerCase(Locale.ROOT), DEADLINE_MARKER);
         String taskName = taskCommand.substring(DEADLINE_PREFIX.length(), deadlineMarker).strip();
         String deadline = taskCommand.substring(deadlineMarker + DEADLINE_MARKER.length()).strip();
         return new Deadline(taskName, deadline);
@@ -164,8 +190,9 @@ public class TaskList {
      * @return event represented by the command.
      */
     private static Event createEvent(String taskCommand) {
-        int fromMarker = taskCommand.indexOf(EVENT_FROM_MARKER);
-        int toMarker = taskCommand.indexOf(EVENT_TO_MARKER);
+        String normalizedCommand = taskCommand.toLowerCase(Locale.ROOT);
+        int fromMarker = findMarker(normalizedCommand, EVENT_FROM_MARKER);
+        int toMarker = findMarker(normalizedCommand, EVENT_TO_MARKER);
         String taskName = taskCommand.substring(EVENT_PREFIX.length(), fromMarker).strip();
         String durationStart = taskCommand.substring(fromMarker + EVENT_FROM_MARKER.length(), toMarker)
                 .strip();
@@ -182,6 +209,125 @@ public class TaskList {
     private static ToDo createToDo(String taskCommand) {
         String taskName = taskCommand.substring(TODO_PREFIX.length()).strip();
         return new ToDo(taskName);
+    }
+
+    /**
+     * Returns a validation message for an invalid task command.
+     *
+     * @param taskCommand task command to validate.
+     * @return validation message, or {@code null} when the command is valid.
+     */
+    private static String getTaskValidationMessage(String taskCommand) {
+        String normalizedCommand = taskCommand.toLowerCase(Locale.ROOT);
+
+        if (normalizedCommand.startsWith(TODO_PREFIX)) {
+            String taskName = taskCommand.substring(TODO_PREFIX.length()).strip();
+            return taskName.isEmpty() ? "Missing task description. Please try again." : null;
+        }
+
+        if (normalizedCommand.startsWith(DEADLINE_PREFIX)) {
+            int deadlineMarker = findMarker(normalizedCommand, DEADLINE_MARKER);
+            if (deadlineMarker < 0) {
+                return "Deadline must include a /by date.";
+            }
+            if (findMarker(normalizedCommand, DEADLINE_MARKER,
+                    deadlineMarker + DEADLINE_MARKER.length()) >= 0) {
+                return "Deadline may contain only one /by marker.";
+            }
+
+            String taskName = taskCommand.substring(DEADLINE_PREFIX.length(), deadlineMarker).strip();
+            String deadline = taskCommand.substring(deadlineMarker + DEADLINE_MARKER.length()).strip();
+            if (taskName.isEmpty()) {
+                return "Missing deadline description. Please try again.";
+            }
+            return deadline.isEmpty() ? "Missing deadline date. Please try again." : null;
+        }
+
+        if (normalizedCommand.startsWith(EVENT_PREFIX)) {
+            int fromMarker = findMarker(normalizedCommand, EVENT_FROM_MARKER);
+            int toMarker = findMarker(normalizedCommand, EVENT_TO_MARKER);
+            if (fromMarker < 0) {
+                return "Event must include a /from time.";
+            }
+            if (toMarker < 0) {
+                return "Event must include a /to time.";
+            }
+            if (toMarker <= fromMarker) {
+                return "The /to marker must come after /from.";
+            }
+            if (findMarker(normalizedCommand, EVENT_FROM_MARKER,
+                    fromMarker + EVENT_FROM_MARKER.length()) >= 0
+                    || findMarker(normalizedCommand, EVENT_TO_MARKER,
+                    toMarker + EVENT_TO_MARKER.length()) >= 0) {
+                return "Event may only contain one /from and one /to marker.";
+            }
+
+            String taskName = taskCommand.substring(EVENT_PREFIX.length(), fromMarker).strip();
+            String durationStart = taskCommand.substring(fromMarker + EVENT_FROM_MARKER.length(),
+                    toMarker).strip();
+            String durationEnd = taskCommand.substring(toMarker + EVENT_TO_MARKER.length()).strip();
+            if (taskName.isEmpty()) {
+                return "Missing event description. Please try again.";
+            }
+            if (durationStart.isEmpty()) {
+                return "Missing event start time. Please try again.";
+            }
+            return durationEnd.isEmpty() ? "Missing event end time. Please try again." : null;
+        }
+
+        return "Sorry, please insert a valid task.";
+    }
+
+    /**
+     * Returns an argument when a command has the expected command word.
+     *
+     * @param command complete command entered by the user.
+     * @param commandWord expected command word.
+     * @return stripped command argument, or an empty string when it is missing or malformed.
+     */
+    private static String getCommandArgument(String command, String commandWord) {
+        String trimmedCommand = command.strip();
+        if (trimmedCommand.length() <= commandWord.length()
+                || !trimmedCommand.regionMatches(true, 0, commandWord, 0, commandWord.length())
+                || !Character.isWhitespace(trimmedCommand.charAt(commandWord.length()))) {
+            return "";
+        }
+        return trimmedCommand.substring(commandWord.length()).strip();
+    }
+
+    /**
+     * Returns the position of a marker that is separated from surrounding text.
+     *
+     * @param command normalized command to search.
+     * @param marker marker to find.
+     * @return marker position, or {@code -1} when no valid marker is present.
+     */
+    private static int findMarker(String command, String marker) {
+        return findMarker(command, marker, 0);
+    }
+
+    /**
+     * Returns the position of a separated marker after a given position.
+     *
+     * @param command normalized command to search.
+     * @param marker marker to find.
+     * @param searchFrom position at which to start searching.
+     * @return marker position, or {@code -1} when no valid marker is present.
+     */
+    private static int findMarker(String command, String marker, int searchFrom) {
+        int markerPosition = command.indexOf(marker, searchFrom);
+        while (markerPosition >= 0) {
+            int markerEnd = markerPosition + marker.length();
+            boolean hasWhitespaceBefore = markerPosition > 0
+                    && Character.isWhitespace(command.charAt(markerPosition - 1));
+            boolean hasWhitespaceAfter = markerEnd == command.length()
+                    || Character.isWhitespace(command.charAt(markerEnd));
+            if (hasWhitespaceBefore && hasWhitespaceAfter) {
+                return markerPosition;
+            }
+            markerPosition = command.indexOf(marker, markerEnd);
+        }
+        return -1;
     }
 
     /**

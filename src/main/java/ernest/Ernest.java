@@ -72,22 +72,50 @@ public final class Ernest {
      * @return false when the command ends the chat; otherwise true.
      */
     private static boolean processCommand(String command, TaskList taskList) {
-        String normalizedCommand = command.toLowerCase(Locale.ROOT);
+        String trimmedCommand = command.strip();
+        String normalizedCommand = trimmedCommand.toLowerCase(Locale.ROOT);
+        String[] commandParts = normalizedCommand.isEmpty()
+                ? new String[0] : normalizedCommand.split("\\s+", 2);
 
-        if (command.equalsIgnoreCase("bye")) {
-            return false;
-        } else if (command.equalsIgnoreCase("list")) {
-            TaskList.listTasks(taskList.tasks);
-        } else if (normalizedCommand.startsWith("mark ")) {
-            TaskList.markTask(command, taskList.tasks);
-        } else if (normalizedCommand.startsWith("unmark ")) {
-            TaskList.unmarkTask(command, taskList.tasks);
-        } else if (normalizedCommand.startsWith("todo ")
-                || normalizedCommand.startsWith("deadline ")
-                || normalizedCommand.startsWith("event ")) {
-            TaskList.addTask(command, taskList.tasks);
-        } else {
+        if (commandParts.length == 0) {
             System.out.println("Sorry, please insert a valid command.");
+        } else {
+            String commandWord = commandParts[0];
+            switch (commandWord) {
+            case "bye":
+                if (commandParts.length == 1) {
+                    return false;
+                }
+                System.out.println("Sorry, please insert a valid command.");
+                break;
+            case "list":
+                if (commandParts.length == 1) {
+                    TaskList.listTasks(taskList.tasks);
+                } else {
+                    System.out.println("Sorry, please insert a valid command.");
+                }
+                break;
+            case "mark":
+                TaskList.markTask(trimmedCommand, taskList.tasks);
+                break;
+            case "unmark":
+                TaskList.unmarkTask(trimmedCommand, taskList.tasks);
+                break;
+            case "todo":
+                // Fallthrough
+            case "deadline":
+                // Fallthrough
+            case "event":
+                if (commandParts.length == 1) {
+                    System.out.println("Missing task description. Please try again.");
+                } else {
+                    TaskList.addTask(trimmedCommand, taskList.tasks);
+                }
+                break;
+            default:
+                System.out.println("Sorry, please insert a valid command.");
+                break;
+            }
         }
 
         System.out.println(HORIZONTAL_LINE);
