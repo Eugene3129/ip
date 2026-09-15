@@ -22,6 +22,24 @@ public class Event extends Task {
         this.durationEnd = durationEnd;
     }
 
+    /**
+     * Returns this event's start time.
+     *
+     * @return start time.
+     */
+    public String getDurationStart() {
+        return this.durationStart;
+    }
+
+    /**
+     * Returns this event's end time.
+     *
+     * @return end time.
+     */
+    public String getDurationEnd() {
+        return this.durationEnd;
+    }
+
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + durationStart + " to: " + durationEnd + ")";

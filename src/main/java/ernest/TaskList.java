@@ -8,6 +8,7 @@ import java.util.Locale;
  * Stores and manages the tasks in Ernest's to-do list.
  */
 public final class TaskList {
+    // Creation of TaskList inspired by peilingggg, but code is my own work
     /** Maximum number of tasks that Ernest can store. */
     private static final int MAX_TASKS = 100;
     private static final String TODO_PREFIX = "todo ";
@@ -21,12 +22,13 @@ public final class TaskList {
     private static final String DELETE_COMMAND = "delete";
 
     /** Tasks currently stored in this list. */
-    private final List<Task> tasks = new ArrayList<>();
+    private final ArrayList<Task> tasks;
 
     /**
-     * Creates an empty task list.
+     * Creates a task list loaded from the local data file.
      */
     public TaskList() {
+        this.tasks = Storage.loadTasks(MAX_TASKS);
     }
 
     /**
@@ -39,6 +41,15 @@ public final class TaskList {
             Task task = tasks.get(i);
             System.out.println((i + 1) + ". " + task);
         }
+    }
+
+    /**
+     * Removes every task from the list and saves the empty list.
+     */
+    public void clearTasks() {
+        tasks.clear();
+        saveTasks();
+        System.out.println("Task list cleared.");
     }
 
     /**
@@ -64,6 +75,7 @@ public final class TaskList {
         }
 
         task.setDone(true);
+        saveTasks();
         System.out.println("Well done! Marked task " + taskNumber + " as done.");
     }
 
@@ -91,6 +103,7 @@ public final class TaskList {
         }
 
         task.setDone(false);
+        saveTasks();
         System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
     }
 
@@ -114,6 +127,7 @@ public final class TaskList {
 
         Task task = createTask(normalizedTaskCommand);
         tasks.add(task);
+        saveTasks();
         System.out.println("Ok, I've added to the task list:\n> " + task);
         System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
     }
@@ -136,8 +150,18 @@ public final class TaskList {
         }
 
         tasks.remove(taskNumber - 1);
+        saveTasks();
         System.out.println("Ok, I've deleted this task from the task list:\n> " + task);
         System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
+    }
+
+    /**
+     * Saves the current task list and warns the user when saving fails.
+     */
+    private void saveTasks() {
+        if (!Storage.saveTasks(tasks)) {
+            System.out.println("Warning: Task changes could not be saved.");
+        }
     }
 
     /**

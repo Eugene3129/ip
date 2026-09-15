@@ -30,10 +30,12 @@ public final class Ernest {
      * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
+        TaskList taskList = new TaskList();
         printWelcomeMessage();
-        runChat();
-        System.out.println("Bye. See you again soon!");
-        System.out.println(HORIZONTAL_LINE);
+        if (runChat(taskList)) {
+            System.out.println("Bye. See you again soon!");
+            System.out.println(HORIZONTAL_LINE);
+        }
     }
 
     /**
@@ -51,17 +53,17 @@ public final class Ernest {
     /**
      * Reads and processes commands until the user exits or input ends.
      */
-    private static void runChat() {
-        TaskList taskList = new TaskList();
+    private static boolean runChat(TaskList taskList) {
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
 
                 if (!processCommand(command, taskList)) {
-                    break;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     /**
@@ -104,6 +106,20 @@ public final class Ernest {
             case "unmark":
                 taskList.unmarkTask(trimmedCommand);
                 break;
+            case "clear":
+                if (commandParts.length == 1) {
+                    taskList.clearTasks();
+                } else {
+                    System.out.println("Sorry, please insert a valid command.");
+                }
+                break;
+            case "help":
+                if (commandParts.length == 1) {
+                    printHelpMessage();
+                } else {
+                    System.out.println("Sorry, please insert a valid command.");
+                }
+                break;
             case "todo":
                 // Fallthrough
             case "deadline":
@@ -123,5 +139,16 @@ public final class Ernest {
 
         System.out.println(HORIZONTAL_LINE);
         return true;
+    }
+
+    /**
+     * Prints the commands supported by Ernest.
+     */
+    private static void printHelpMessage() {
+        System.out.println("Available commands:");
+        System.out.println("todo DESCRIPTION");
+        System.out.println("deadline DESCRIPTION /by DATE");
+        System.out.println("event DESCRIPTION /from START /to END");
+        System.out.println("list, mark NUMBER, unmark NUMBER, clear, help, bye");
     }
 }

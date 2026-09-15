@@ -20,6 +20,9 @@ class TestCase:
     aim: str
     inputs: str
     expected_output: str
+    initial_data: str
+    expected_saved_data: str
+    data_directory_is_file: bool
 
 
 def parse_args() -> argparse.Namespace:
@@ -65,6 +68,13 @@ def extract_block(body: str, label: str, case_name: str) -> str:
     return match.group(1)
 
 
+def extract_optional_block(body: str, label: str) -> str:
+    """Extract an optional labelled Markdown text fence from a test case."""
+    pattern = rf"(?ms)^\s*{re.escape(label)}:\s*\n```[^\n]*\n(.*?)^```\s*$"
+    match = re.search(pattern, body)
+    return "" if match is None else match.group(1)
+
+
 def parse_plan(plan_path: Path) -> list[TestCase]:
     """Parse the required test-case fields from the Markdown plan."""
     plan = plan_path.read_text(encoding="utf-8")
@@ -86,7 +96,11 @@ def parse_plan(plan_path: Path) -> list[TestCase]:
             raise ValueError(f"{name}: Inputs must contain at least one command")
         if not expected:
             raise ValueError(f"{name}: Expected output must not be empty")
-        cases.append(TestCase(name, aim_match.group(1).strip(), inputs, expected))
+        initial_data = normalize_newlines(extract_optional_block(body, "Initial data"))
+        expected_saved_data = normalize_newlines(extract_optional_block(body, "Expected saved data"))
+        data_directory_is_file = bool(re.search(r"(?m)^Data directory is a file:\s*$", body))
+        cases.append(TestCase(name, aim_match.group(1).strip(), inputs, expected, initial_data,
+                              expected_saved_data, data_directory_is_file))
     return cases
 
 
@@ -151,26 +165,59 @@ def report_failure(case: TestCase, actual: str) -> None:
     sys.stdout.writelines(diff)
 
 
+def report_saved_data_failure(case: TestCase, actual_saved_data: str) -> None:
+    """Report a mismatch between the expected and actual saved data file."""
+    print("FAIL")
+    print("--- Expected saved data ---")
+    print(case.expected_saved_data, end="" if case.expected_saved_data.endswith("\n") else "\n")
+    print("--- Actual saved data ---")
+    print(actual_saved_data, end="" if actual_saved_data.endswith("\n") else "\n")
+    diff = difflib.unified_diff(
+        case.expected_saved_data.splitlines(keepends=True),
+        actual_saved_data.splitlines(keepends=True),
+        fromfile="expected saved data",
+        tofile="actual saved data",
+    )
+    print("--- Diff ---")
+    sys.stdout.writelines(diff)
+
+
 def run_case(case: TestCase, classes_dir: Path, main_class: str, timeout: float) -> bool:
     """Run one isolated case and stop its caller on the first mismatch."""
     input_text = case.inputs
     if not input_text.endswith("\n"):
         input_text += "\n"
-    try:
-        result = subprocess.run(
-            ["java", "-cp", str(classes_dir), main_class],
-            input=input_text,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=False,
-        )
-    except subprocess.TimeoutExpired as exception:
-        actual = normalize_newlines((exception.stdout or "") + (exception.stderr or ""))
-        show_transcript(case, actual)
-        print(f"FAIL: process exceeded the {timeout:g}-second timeout")
-        report_failure(case, actual)
-        return False
+    with tempfile.TemporaryDirectory(prefix="test-ui-case-") as temporary_dir:
+        working_dir = Path(temporary_dir)
+        data_file = working_dir / "data" / "ernest.txt"
+        if case.data_directory_is_file:
+            data_file.parent.write_text("", encoding="utf-8")
+        elif case.initial_data:
+            data_file.parent.mkdir(parents=True)
+            data_file.write_text(case.initial_data, encoding="utf-8")
+        try:
+            result = subprocess.run(
+                ["java", "-cp", str(classes_dir), main_class],
+                cwd=working_dir,
+                input=input_text,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as exception:
+            actual = normalize_newlines((exception.stdout or "") + (exception.stderr or ""))
+            show_transcript(case, actual)
+            print(f"FAIL: process exceeded the {timeout:g}-second timeout")
+            report_failure(case, actual)
+            return False
+
+        actual_saved_data = ""
+        if case.expected_saved_data:
+            try:
+                actual_saved_data = normalize_newlines(data_file.read_text(encoding="utf-8"))
+            except OSError:
+                actual_saved_data = "<saved data file is missing>\n"
 
     actual = normalize_newlines(result.stdout + result.stderr)
     show_transcript(case, actual)
@@ -180,6 +227,9 @@ def run_case(case: TestCase, classes_dir: Path, main_class: str, timeout: float)
         return False
     if actual != case.expected_output:
         report_failure(case, actual)
+        return False
+    if case.expected_saved_data and actual_saved_data != case.expected_saved_data:
+        report_saved_data_failure(case, actual_saved_data)
         return False
     print("PASS")
     return True
