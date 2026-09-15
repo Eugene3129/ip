@@ -1,13 +1,13 @@
 package ernest;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * Stores and manages the tasks in Ernest's to-do list.
  */
-public class TaskList {
-    // Creation of TaskList inspired by peilingggg, but code is my own work
+public final class TaskList {
     /** Maximum number of tasks that Ernest can store. */
     private static final int MAX_TASKS = 100;
     private static final String TODO_PREFIX = "todo ";
@@ -18,28 +18,26 @@ public class TaskList {
     private static final String EVENT_TO_MARKER = "/to";
     private static final String MARK_COMMAND = "mark";
     private static final String UNMARK_COMMAND = "unmark";
+    private static final String DELETE_COMMAND = "delete";
 
     /** Tasks currently stored in this list. */
-    protected ArrayList<Task> tasks;
+    private final List<Task> tasks = new ArrayList<>();
 
     /**
      * Creates an empty task list.
      */
     public TaskList() {
-        this.tasks = new ArrayList<>();
     }
 
     /**
      * Prints all tasks and their completion status.
-     *
-     * @param tasks tasks to print.
      */
-    public static void listTasks(ArrayList<Task> tasks) {
+    public void listTasks() {
         System.out.println("Your to-do list is:");
 
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
-            System.out.println((i + 1) + ". " + task.toString());
+            System.out.println((i + 1) + ". " + task);
         }
     }
 
@@ -47,29 +45,16 @@ public class TaskList {
      * Marks a task as done when the command contains a valid task number.
      *
      * @param command mark command entered by the user.
-     * @param tasks tasks that can be marked.
      */
-    public static void markTask(String command, ArrayList<Task> tasks) {
-        String taskNumberText = getCommandArgument(command, MARK_COMMAND);
-        if (taskNumberText.isEmpty()) {
-            System.out.println("Missing task number. Please refer to the tasks list and "
-                    + "try again.");
+    public void markTask(String command) {
+        Integer taskNumber = getTaskNumber(command, MARK_COMMAND);
+        if (taskNumber == null) {
             return;
         }
 
-        int taskNumber;
-        try {
-            taskNumber = Integer.parseInt(taskNumberText);
-        } catch (NumberFormatException exception) {
-            System.out.println("Task number must be an integer.");
-            return;
-        }
-
-        Task task = getTask(taskNumber, tasks);
-
+        Task task = getTask(taskNumber);
         if (task == null) {
-            System.out.println("Invalid task number. Please refer to the tasks list and "
-                    + "try again.");
+            printInvalidTaskNumberMessage();
             return;
         }
 
@@ -86,29 +71,16 @@ public class TaskList {
      * Marks a task as not done when the command contains a valid task number.
      *
      * @param command unmark command entered by the user.
-     * @param tasks tasks that can be unmarked.
      */
-    public static void unmarkTask(String command, ArrayList<Task> tasks) {
-        String taskNumberText = getCommandArgument(command, UNMARK_COMMAND);
-        if (taskNumberText.isEmpty()) {
-            System.out.println("Missing task number. Please refer to the tasks list and "
-                    + "try again.");
+    public void unmarkTask(String command) {
+        Integer taskNumber = getTaskNumber(command, UNMARK_COMMAND);
+        if (taskNumber == null) {
             return;
         }
 
-        int taskNumber;
-        try {
-            taskNumber = Integer.parseInt(taskNumberText);
-        } catch (NumberFormatException exception) {
-            System.out.println("Task number must be an integer.");
-            return;
-        }
-
-        Task task = getTask(taskNumber, tasks);
-
+        Task task = getTask(taskNumber);
         if (task == null) {
-            System.out.println("Invalid task number. Please refer to the tasks list and "
-                    + "try again.");
+            printInvalidTaskNumberMessage();
             return;
         }
 
@@ -126,50 +98,64 @@ public class TaskList {
      * Adds a new task when the task list has available space.
      *
      * @param taskCommand task command entered by the user.
-     * @param tasks list to which the new task is added.
      */
-    public static void addTask(String taskCommand, ArrayList<Task> tasks) {
-        if (tasks.size() < MAX_TASKS) {
-            String normalizedTaskCommand = taskCommand.strip().replaceFirst("\\s+", " ");
-            String validationMessage = getTaskValidationMessage(normalizedTaskCommand);
-            if (validationMessage != null) {
-                System.out.println(validationMessage);
-                return;
-            }
-
-            Task task = createTask(normalizedTaskCommand);
-            if (task == null) {
-                System.out.println("Sorry, please insert a valid task.");
-                return;
-            }
-
-            tasks.add(task);
-            System.out.println("Added to task list:\n> " + task.toString());
-            System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
-        } else {
+    public void addTask(String taskCommand) {
+        if (tasks.size() >= MAX_TASKS) {
             System.out.println("The list is full (" + MAX_TASKS + "/" + MAX_TASKS + ").");
+            return;
         }
+
+        String normalizedTaskCommand = taskCommand.strip().replaceFirst("\\s+", " ");
+        String validationMessage = getTaskValidationMessage(normalizedTaskCommand);
+        if (validationMessage != null) {
+            System.out.println(validationMessage);
+            return;
+        }
+
+        Task task = createTask(normalizedTaskCommand);
+        tasks.add(task);
+        System.out.println("Ok, I've added to the task list:\n> " + task);
+        System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
+    }
+
+    /**
+     * Deletes a task when the command contains a valid task number.
+     *
+     * @param command delete command entered by the user.
+     */
+    public void deleteTask(String command) {
+        Integer taskNumber = getTaskNumber(command, DELETE_COMMAND);
+        if (taskNumber == null) {
+            return;
+        }
+
+        Task task = getTask(taskNumber);
+        if (task == null) {
+            printInvalidTaskNumberMessage();
+            return;
+        }
+
+        tasks.remove(taskNumber - 1);
+        System.out.println("Ok, I've deleted this task from the task list:\n> " + task);
+        System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
     }
 
     /**
      * Creates the task represented by a supported task command.
-     * The command type is matched without regard to letter case before the
-     * corresponding task subtype is constructed.
      *
      * @param taskCommand command containing the task type and details.
      * @return task represented by the command.
      */
-    private static Task createTask(String taskCommand) {
+    private Task createTask(String taskCommand) {
         String normalizedCommand = taskCommand.toLowerCase(Locale.ROOT);
 
         if (normalizedCommand.startsWith(DEADLINE_PREFIX)) {
             return createDeadline(taskCommand);
         } else if (normalizedCommand.startsWith(EVENT_PREFIX)) {
             return createEvent(taskCommand);
-        } else if (normalizedCommand.startsWith(TODO_PREFIX)) {
+        } else {
             return createToDo(taskCommand);
         }
-        return null;
     }
 
     /**
@@ -178,7 +164,7 @@ public class TaskList {
      * @param taskCommand deadline command containing a description and due date.
      * @return deadline represented by the command.
      */
-    private static Deadline createDeadline(String taskCommand) {
+    private Deadline createDeadline(String taskCommand) {
         int deadlineMarker = findMarker(taskCommand.toLowerCase(Locale.ROOT), DEADLINE_MARKER);
         String taskName = taskCommand.substring(DEADLINE_PREFIX.length(), deadlineMarker).strip();
         String deadline = taskCommand.substring(deadlineMarker + DEADLINE_MARKER.length()).strip();
@@ -191,7 +177,7 @@ public class TaskList {
      * @param taskCommand event command containing a description and time range.
      * @return event represented by the command.
      */
-    private static Event createEvent(String taskCommand) {
+    private Event createEvent(String taskCommand) {
         String normalizedCommand = taskCommand.toLowerCase(Locale.ROOT);
         int fromMarker = findMarker(normalizedCommand, EVENT_FROM_MARKER);
         int toMarker = findMarker(normalizedCommand, EVENT_TO_MARKER);
@@ -208,7 +194,7 @@ public class TaskList {
      * @param taskCommand to-do command containing a description.
      * @return to-do task represented by the command.
      */
-    private static ToDo createToDo(String taskCommand) {
+    private ToDo createToDo(String taskCommand) {
         String taskName = taskCommand.substring(TODO_PREFIX.length()).strip();
         return new ToDo(taskName);
     }
@@ -219,7 +205,7 @@ public class TaskList {
      * @param taskCommand task command to validate.
      * @return validation message, or {@code null} when the command is valid.
      */
-    private static String getTaskValidationMessage(String taskCommand) {
+    private String getTaskValidationMessage(String taskCommand) {
         String normalizedCommand = taskCommand.toLowerCase(Locale.ROOT);
 
         if (normalizedCommand.startsWith(TODO_PREFIX)) {
@@ -265,8 +251,8 @@ public class TaskList {
             }
 
             String taskName = taskCommand.substring(EVENT_PREFIX.length(), fromMarker).strip();
-            String durationStart = taskCommand.substring(fromMarker + EVENT_FROM_MARKER.length(),
-                    toMarker).strip();
+            String durationStart = taskCommand.substring(fromMarker + EVENT_FROM_MARKER.length(), toMarker)
+                    .strip();
             String durationEnd = taskCommand.substring(toMarker + EVENT_TO_MARKER.length()).strip();
             if (taskName.isEmpty()) {
                 return "Missing event description. Please try again.";
@@ -287,7 +273,7 @@ public class TaskList {
      * @param commandWord expected command word.
      * @return stripped command argument, or an empty string when it is missing or malformed.
      */
-    private static String getCommandArgument(String command, String commandWord) {
+    private String getCommandArgument(String command, String commandWord) {
         String trimmedCommand = command.strip();
         if (trimmedCommand.length() <= commandWord.length()
                 || !trimmedCommand.regionMatches(true, 0, commandWord, 0, commandWord.length())
@@ -298,13 +284,42 @@ public class TaskList {
     }
 
     /**
+     * Returns the task number from a command or prints an explanatory message.
+     *
+     * @param command complete command entered by the user.
+     * @param commandWord expected command word.
+     * @return task number, or {@code null} when the argument is missing or invalid.
+     */
+    private Integer getTaskNumber(String command, String commandWord) {
+        String taskNumberText = getCommandArgument(command, commandWord);
+        if (taskNumberText.isEmpty()) {
+            System.out.println("Missing task number. Please refer to the task list and try again.");
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException exception) {
+            System.out.println("Task number must be an integer.");
+            return null;
+        }
+    }
+
+    /**
+     * Prints the message used when a task number does not identify a stored task.
+     */
+    private void printInvalidTaskNumberMessage() {
+        System.out.println("Invalid task number. Please refer to the task list and try again.");
+    }
+
+    /**
      * Returns the position of a marker that is separated from surrounding text.
      *
      * @param command normalized command to search.
      * @param marker marker to find.
      * @return marker position, or {@code -1} when no valid marker is present.
      */
-    private static int findMarker(String command, String marker) {
+    private int findMarker(String command, String marker) {
         return findMarker(command, marker, 0);
     }
 
@@ -316,7 +331,7 @@ public class TaskList {
      * @param searchFrom position at which to start searching.
      * @return marker position, or {@code -1} when no valid marker is present.
      */
-    private static int findMarker(String command, String marker, int searchFrom) {
+    private int findMarker(String command, String marker, int searchFrom) {
         int markerPosition = command.indexOf(marker, searchFrom);
         while (markerPosition >= 0) {
             int markerEnd = markerPosition + marker.length();
@@ -336,11 +351,10 @@ public class TaskList {
      * Returns the task at a valid one-based task number.
      *
      * @param taskNumber one-based task number to look up.
-     * @param tasks list containing the available tasks.
      * @return matching task, or {@code null} when the number is invalid.
      */
-    private static Task getTask(int taskNumber, ArrayList<Task> tasks) {
-        if (!isValidTaskNumber(taskNumber, tasks)) {
+    private Task getTask(int taskNumber) {
+        if (!isValidTaskNumber(taskNumber)) {
             return null;
         }
         return tasks.get(taskNumber - 1);
@@ -350,10 +364,9 @@ public class TaskList {
      * Checks whether a one-based task number identifies a task in the list.
      *
      * @param taskNumber one-based task number to check.
-     * @param tasks list containing the available tasks.
      * @return true if the number identifies a task; otherwise false.
      */
-    public static boolean isValidTaskNumber(int taskNumber, ArrayList<Task> tasks) {
+    private boolean isValidTaskNumber(int taskNumber) {
         return taskNumber >= 1 && taskNumber <= tasks.size();
     }
 }

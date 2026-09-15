@@ -71,15 +71,15 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] Buy Milk
 Current list size: 1/100
 ______________________________________
-Added to task list:
+Ok, I've added to the task list:
 > [D][ ] Submit Report (by: Friday)
 Current list size: 2/100
 ______________________________________
-Added to task list:
+Ok, I've added to the task list:
 > [E][ ] Team Meeting (from: 10am to: 11am)
 Current list size: 3/100
 ______________________________________
@@ -135,7 +135,7 @@ Missing event start time. Please try again.
 ______________________________________
 Missing event end time. Please try again.
 ______________________________________
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] valid task
 Current list size: 1/100
 ______________________________________
@@ -175,17 +175,17 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Missing task number. Please refer to the tasks list and try again.
+Missing task number. Please refer to the task list and try again.
 ______________________________________
-Missing task number. Please refer to the tasks list and try again.
-______________________________________
-Missing task description. Please try again.
+Missing task number. Please refer to the task list and try again.
 ______________________________________
 Missing task description. Please try again.
 ______________________________________
 Missing task description. Please try again.
 ______________________________________
-Added to task list:
+Missing task description. Please try again.
+______________________________________
+Ok, I've added to the task list:
 > [T][ ] keep working
 Current list size: 1/100
 ______________________________________
@@ -222,15 +222,15 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] review the lecture
 Current list size: 1/100
 ______________________________________
-Added to task list:
+Ok, I've added to the task list:
 > [D][ ] submit the assignment (by: Friday)
 Current list size: 2/100
 ______________________________________
-Added to task list:
+Ok, I've added to the task list:
 > [E][ ] project discussion (from: 2pm to: 3pm)
 Current list size: 3/100
 ______________________________________
@@ -271,17 +271,17 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] keep this task
 Current list size: 1/100
 ______________________________________
-Invalid task number. Please refer to the tasks list and try again.
+Invalid task number. Please refer to the task list and try again.
 ______________________________________
-Invalid task number. Please refer to the tasks list and try again.
+Invalid task number. Please refer to the task list and try again.
 ______________________________________
-Invalid task number. Please refer to the tasks list and try again.
+Invalid task number. Please refer to the task list and try again.
 ______________________________________
-Invalid task number. Please refer to the tasks list and try again.
+Invalid task number. Please refer to the task list and try again.
 ______________________________________
 Your to-do list is:
 1. [T][ ] keep this task
@@ -314,7 +314,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] read the course notes
 Current list size: 1/100
 ______________________________________
@@ -351,7 +351,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] submit the report
 Current list size: 1/100
 ______________________________________
@@ -451,7 +451,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [D][ ] submit assignment (by: Friday)
 Current list size: 1/100
 ______________________________________
@@ -486,7 +486,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [E][ ] team meeting (from: 10am to: 11am)
 Current list size: 1/100
 ______________________________________
@@ -524,7 +524,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] prepare slides
 Current list size: 1/100
 ______________________________________
@@ -570,7 +570,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] check the answer
 Current list size: 1/100
 ______________________________________
@@ -615,13 +615,13 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] first task
 Current list size: 1/100
 ______________________________________
 Event must include a /from time.
 ______________________________________
-Added to task list:
+Ok, I've added to the task list:
 > [D][ ] second task (by: tomorrow)
 Current list size: 2/100
 ______________________________________
@@ -693,7 +693,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] verify state
 Current list size: 1/100
 ______________________________________
@@ -737,7 +737,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] spaced task
 Current list size: 1/100
 ______________________________________
@@ -745,6 +745,64 @@ Well done! Marked task 1 as done.
 ______________________________________
 Your to-do list is:
 1. [T][X] spaced task
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Delete tasks safely
+
+Aim: Verify that deletion removes the requested task, renumbers the remaining
+task, and rejects missing, nonnumeric, and out-of-range task numbers.
+
+Inputs:
+```text
+todo first task
+todo second task
+delete 1
+mark 1
+delete
+delete abc
+delete 2
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Ok, I've added to the task list:
+> [T][ ] first task
+Current list size: 1/100
+______________________________________
+Ok, I've added to the task list:
+> [T][ ] second task
+Current list size: 2/100
+______________________________________
+Ok, I've deleted this task from the task list:
+> [T][ ] first task
+Current list size: 1/100
+______________________________________
+Well done! Marked task 1 as done.
+______________________________________
+Missing task number. Please refer to the task list and try again.
+______________________________________
+Task number must be an integer.
+______________________________________
+Invalid task number. Please refer to the task list and try again.
+______________________________________
+Your to-do list is:
+1. [T][X] second task
 ______________________________________
 Bye. See you again soon!
 ______________________________________
