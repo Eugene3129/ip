@@ -28,3 +28,6 @@ node_modules/
 
 /text-ui-test/ACTUAL.TXT
 text-ui-test/EXPECTED-UNIX.TXT
+
+# Persistent application data
+/data/

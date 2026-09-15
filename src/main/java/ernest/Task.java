@@ -34,6 +34,15 @@ public class Task {
         return this.isDone;
     }
 
+    /**
+     * Returns this task's description.
+     *
+     * @return task description.
+     */
+    public String getTaskName() {
+        return this.taskName;
+    }
+
     public void setDone(boolean isDone) {
         this.isDone = isDone;
     }

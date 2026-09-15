@@ -6,7 +6,7 @@ import java.util.Locale;
 /**
  * Stores and manages the tasks in Ernest's to-do list.
  */
-public class TaskList {
+public final class TaskList {
     // Creation of TaskList inspired by peilingggg, but code is my own work
     /** Maximum number of tasks that Ernest can store. */
     private static final int MAX_TASKS = 100;
@@ -20,21 +20,20 @@ public class TaskList {
     private static final String UNMARK_COMMAND = "unmark";
 
     /** Tasks currently stored in this list. */
-    protected ArrayList<Task> tasks;
+    private final ArrayList<Task> tasks;
 
     /**
-     * Creates an empty task list.
+     * Creates a task list loaded from the local data file.
      */
     public TaskList() {
-        this.tasks = new ArrayList<>();
+        this.tasks = Storage.loadTasks(MAX_TASKS);
     }
 
     /**
      * Prints all tasks and their completion status.
      *
-     * @param tasks tasks to print.
      */
-    public static void listTasks(ArrayList<Task> tasks) {
+    public void listTasks() {
         System.out.println("Your to-do list is:");
 
         for (int i = 0; i < tasks.size(); i++) {
@@ -44,12 +43,21 @@ public class TaskList {
     }
 
     /**
+     * Removes every task from the list and saves the empty list.
+     *
+     */
+    public void clearTasks() {
+        tasks.clear();
+        saveTasks();
+        System.out.println("Task list cleared.");
+    }
+
+    /**
      * Marks a task as done when the command contains a valid task number.
      *
      * @param command mark command entered by the user.
-     * @param tasks tasks that can be marked.
      */
-    public static void markTask(String command, ArrayList<Task> tasks) {
+    public void markTask(String command) {
         String taskNumberText = getCommandArgument(command, MARK_COMMAND);
         if (taskNumberText.isEmpty()) {
             System.out.println("Missing task number. Please refer to the tasks list and "
@@ -79,6 +87,7 @@ public class TaskList {
         }
 
         task.setDone(true);
+        saveTasks();
         System.out.println("Well done! Marked task " + taskNumber + " as done.");
     }
 
@@ -86,9 +95,8 @@ public class TaskList {
      * Marks a task as not done when the command contains a valid task number.
      *
      * @param command unmark command entered by the user.
-     * @param tasks tasks that can be unmarked.
      */
-    public static void unmarkTask(String command, ArrayList<Task> tasks) {
+    public void unmarkTask(String command) {
         String taskNumberText = getCommandArgument(command, UNMARK_COMMAND);
         if (taskNumberText.isEmpty()) {
             System.out.println("Missing task number. Please refer to the tasks list and "
@@ -119,6 +127,7 @@ public class TaskList {
         }
 
         task.setDone(false);
+        saveTasks();
         System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
     }
 
@@ -126,9 +135,8 @@ public class TaskList {
      * Adds a new task when the task list has available space.
      *
      * @param taskCommand task command entered by the user.
-     * @param tasks list to which the new task is added.
      */
-    public static void addTask(String taskCommand, ArrayList<Task> tasks) {
+    public void addTask(String taskCommand) {
         if (tasks.size() < MAX_TASKS) {
             String normalizedTaskCommand = taskCommand.strip().replaceFirst("\\s+", " ");
             String validationMessage = getTaskValidationMessage(normalizedTaskCommand);
@@ -144,10 +152,20 @@ public class TaskList {
             }
 
             tasks.add(task);
+            saveTasks();
             System.out.println("Added to task list:\n> " + task.toString());
             System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
         } else {
             System.out.println("The list is full (" + MAX_TASKS + "/" + MAX_TASKS + ").");
+        }
+    }
+
+    /**
+     * Saves the current task list and warns the user when saving fails.
+     */
+    private void saveTasks() {
+        if (!Storage.saveTasks(tasks)) {
+            System.out.println("Warning: Task changes could not be saved.");
         }
     }
 

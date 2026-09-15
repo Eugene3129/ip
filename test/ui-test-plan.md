@@ -9,8 +9,16 @@ This plan exercises the stdin/console interface of
 - Main class: `ernest.Ernest`.
 - The test runner compiles all sources under `src/main/java` into a temporary
   directory before testing.
-- Each test case runs in a fresh process. Input lines are sent in order, one
-  command per line, and `bye` ends the session.
+- Each test case runs in a fresh process and temporary working directory. Input
+  lines are sent in order, one command per line, and `bye` ends the session.
+- Each successful add, mark, or unmark command writes the current task list to
+  `data/ernest.txt` as CSV. Ernest loads this file when it starts.
+- A test case may include an optional `Initial data` CSV block. The runner
+  writes it to `data/ernest.txt` before starting that case.
+- A test case may include an optional `Expected saved data` CSV block. The
+  runner compares it with `data/ernest.txt` after that case completes.
+- A test case may include `Data directory is a file:` to create a file named
+  `data`, which simulates a storage-directory creation failure.
 - Output is compared exactly after CRLF/CR line endings are normalized to LF.
   Extra output, missing output, ordering changes, and whitespace changes fail
   the case.
@@ -39,6 +47,88 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Load saved tasks at startup
+
+Aim: Verify that Ernest restores all supported task types and completion states from its CSV data file.
+
+Initial data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"todo","true","finish assignment","","",""
+"deadline","false","submit report","Friday","",""
+"event","false","team meeting","","10am","11am"
+```
+
+Inputs:
+```text
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Your to-do list is:
+1. [T][X] finish assignment
+2. [D][ ] submit report (by: Friday)
+3. [E][ ] team meeting (from: 10am to: 11am)
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Ignore malformed saved tasks
+
+Aim: Verify that Ernest loads valid CSV records while ignoring malformed records instead of terminating.
+
+Initial data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"todo","false","keep this task","","",""
+"deadline","maybe","invalid status","Friday","",""
+"unknown","false","invalid type","","",""
+"event","false","unfinished
+"todo","true","also keep this task","","",""
+```
+
+Inputs:
+```text
+list
+bye
+```
+
+Expected output:
+```text
+Warning: Some saved tasks could not be loaded.
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Your to-do list is:
+1. [T][ ] keep this task
+2. [T][X] also keep this task
+______________________________________
 Bye. See you again soon!
 ______________________________________
 ```
@@ -745,6 +835,173 @@ Well done! Marked task 1 as done.
 ______________________________________
 Your to-do list is:
 1. [T][X] spaced task
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Clear the task list
+
+Aim: Verify that `clear` removes all tasks and that the following list command shows an empty list.
+
+Inputs:
+```text
+todo remove this task
+clear
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Added to task list:
+> [T][ ] remove this task
+Current list size: 1/100
+______________________________________
+Task list cleared.
+______________________________________
+Your to-do list is:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Create and populate storage on first save
+
+Aim: Verify that a fresh working directory gains a data folder and populated CSV file after a task is added.
+
+Inputs:
+```text
+todo persist this task
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Added to task list:
+> [T][ ] persist this task
+Current list size: 1/100
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+Expected saved data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"todo","false","persist this task","","",""
+```
+
+## Test case: Show command help
+
+Aim: Verify that `help` displays every supported command and that Ernest continues accepting commands.
+
+Inputs:
+```text
+help
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Available commands:
+todo DESCRIPTION
+deadline DESCRIPTION /by DATE
+event DESCRIPTION /from START /to END
+list, mark NUMBER, unmark NUMBER, clear, help, bye
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Handle end of input
+
+Aim: Verify that Ernest exits cleanly without printing a farewell when standard input ends without `bye`.
+
+Inputs:
+```text
+list
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Your to-do list is:
+______________________________________
+```
+
+## Test case: Warn when saving fails
+
+Aim: Verify that Ernest informs the user when a task is changed but cannot be saved.
+
+Data directory is a file:
+
+Inputs:
+```text
+todo unsaved task
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Warning: Task changes could not be saved.
+Added to task list:
+> [T][ ] unsaved task
+Current list size: 1/100
 ______________________________________
 Bye. See you again soon!
 ______________________________________
