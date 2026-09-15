@@ -840,7 +840,6 @@ Bye. See you again soon!
 ______________________________________
 ```
 
-<<<<<<< HEAD
 ## Test case: Delete tasks safely
 
 Aim: Verify that deletion removes the requested task, renumbers the remaining
@@ -855,16 +854,6 @@ mark 1
 delete
 delete abc
 delete 2
-=======
-## Test case: Clear the task list
-
-Aim: Verify that `clear` removes all tasks and that the following list command shows an empty list.
-
-Inputs:
-```text
-todo remove this task
-clear
->>>>>>> branch-Level-7
 list
 bye
 ```
@@ -882,7 +871,6 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-<<<<<<< HEAD
 Ok, I've added to the task list:
 > [T][ ] first task
 Current list size: 1/100
@@ -905,8 +893,37 @@ Invalid task number. Please refer to the task list and try again.
 ______________________________________
 Your to-do list is:
 1. [T][X] second task
-=======
-Added to task list:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Clear the task list
+
+Aim: Verify that `clear` removes all tasks and that the following list command shows an empty list.
+
+Inputs:
+```text
+todo remove this task
+clear
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Ok, I've added to the task list:
 > [T][ ] remove this task
 Current list size: 1/100
 ______________________________________
@@ -941,7 +958,7 @@ Hi! I'm Ernest.
 How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] persist this task
 Current list size: 1/100
 ______________________________________
@@ -957,7 +974,7 @@ type,isDone,description,deadline,startTime,endTime
 
 ## Test case: Show command help
 
-Aim: Verify that `help` displays every supported command and that Ernest continues accepting commands.
+Aim: Verify that `help` displays command guidance and that Ernest continues accepting commands.
 
 Inputs:
 ```text
@@ -1040,10 +1057,9 @@ How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
 Warning: Task changes could not be saved.
-Added to task list:
+Ok, I've added to the task list:
 > [T][ ] unsaved task
 Current list size: 1/100
->>>>>>> branch-Level-7
 ______________________________________
 Bye. See you again soon!
 ______________________________________
