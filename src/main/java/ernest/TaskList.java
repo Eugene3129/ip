@@ -153,6 +153,8 @@ public class TaskList {
 
     /**
      * Creates the task represented by a supported task command.
+     * The command type is matched without regard to letter case before the
+     * corresponding task subtype is constructed.
      *
      * @param taskCommand command containing the task type and details.
      * @return task represented by the command.
