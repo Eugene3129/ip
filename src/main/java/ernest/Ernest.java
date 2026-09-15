@@ -90,16 +90,19 @@ public final class Ernest {
                 break;
             case "list":
                 if (commandParts.length == 1) {
-                    TaskList.listTasks(taskList.tasks);
+                    taskList.listTasks();
                 } else {
                     System.out.println("Sorry, please insert a valid command.");
                 }
                 break;
+            case "delete":
+                taskList.deleteTask(trimmedCommand);
+                break;
             case "mark":
-                TaskList.markTask(trimmedCommand, taskList.tasks);
+                taskList.markTask(trimmedCommand);
                 break;
             case "unmark":
-                TaskList.unmarkTask(trimmedCommand, taskList.tasks);
+                taskList.unmarkTask(trimmedCommand);
                 break;
             case "todo":
                 // Fallthrough
@@ -109,7 +112,7 @@ public final class Ernest {
                 if (commandParts.length == 1) {
                     System.out.println("Missing task description. Please try again.");
                 } else {
-                    TaskList.addTask(trimmedCommand, taskList.tasks);
+                    taskList.addTask(trimmedCommand);
                 }
                 break;
             default:
