@@ -124,28 +124,28 @@ public final class TaskList {
     }
 
     /**
-     * Adds a new task when the task list has available space.
+     * Adds and returns a new task when the command is valid and the list has space.
      *
      * @param taskCommand task command entered by the user.
+     * @return added task, or {@code null} when the task could not be added.
      */
-    public void addTask(String taskCommand) {
+    public Task addTask(String taskCommand) {
         if (tasks.size() >= MAX_TASKS) {
             System.out.println("The list is full (" + MAX_TASKS + "/" + MAX_TASKS + ").");
-            return;
+            return null;
         }
 
         String normalizedTaskCommand = taskCommand.strip().replaceFirst("\\s+", " ");
         String validationMessage = getTaskValidationMessage(normalizedTaskCommand);
         if (validationMessage != null) {
             System.out.println(validationMessage);
-            return;
+            return null;
         }
 
         Task task = createTask(normalizedTaskCommand);
         tasks.add(task);
         saveTasks();
-        System.out.println("Ok, I've added to the task list:\n> " + task);
-        System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
+        return task;
     }
 
     /**

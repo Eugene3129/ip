@@ -138,7 +138,11 @@ public final class Ernest {
                     if (command.parts().length == 1) {
                         ui.showMissingTaskDescriptionMessage();
                     } else {
-                        taskList.addTask(command.text());
+                        Task addedTask = taskList.addTask(command.text());
+                        if (addedTask != null) {
+                            ui.showTaskAddedMessage(addedTask, taskList.getTaskCount(),
+                                    taskList.getMaximumTaskCount());
+                        }
                     }
                     break;
                 default:
