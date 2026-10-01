@@ -5,16 +5,6 @@ package ernest;
  */
 public final class Ernest {
     private static final String DEFAULT_DATA_FILE_PATH = "data/ernest.txt";
-    private static final String COMMAND_BYE = "bye";
-    private static final String COMMAND_LIST = "list";
-    private static final String COMMAND_DELETE = "delete";
-    private static final String COMMAND_MARK = "mark";
-    private static final String COMMAND_UNMARK = "unmark";
-    private static final String COMMAND_CLEAR = "clear";
-    private static final String COMMAND_HELP = "help";
-    private static final String COMMAND_TODO = "todo";
-    private static final String COMMAND_DEADLINE = "deadline";
-    private static final String COMMAND_EVENT = "event";
 
     /** Storage used to load and save tasks. */
     private final Storage storage;
@@ -64,151 +54,12 @@ public final class Ernest {
      */
     private void runChat() {
         while (ui.hasNextCommand()) {
-            Parser.ParsedCommand command = Parser.parse(ui.readCommand());
-
-            if (isExitCommand(command)) {
-                Command exitCommand = new ExitCommand();
-                executeCommand(exitCommand);
-                if (exitCommand.isExit()) {
-                    return;
-                }
+            Command command = Parser.parse(ui.readCommand());
+            command.execute(taskList, ui, storage);
+            if (command.isExit()) {
+                return;
             }
-            handleCommand(command);
+            ui.showHorizontalLine();
         }
     }
-
-    /**
-     * Returns whether the command requests a valid chat exit.
-     *
-     * @param command parsed command entered by the user.
-     * @return true if the command exits the chat; otherwise false.
-     */
-    private static boolean isExitCommand(Parser.ParsedCommand command) {
-        return command.parts().length == 1 && COMMAND_BYE.equals(command.parts()[0]);
-    }
-
-    /**
-     * Handles one command and prints the corresponding response.
-     *
-     * @param command parsed command entered by the user.
-     */
-    private void handleCommand(Parser.ParsedCommand command) {
-        if (command.parts().length == 0) {
-            executeCommand(new InvalidCommand());
-        } else {
-            String commandWord = command.parts()[0];
-            switch (commandWord) {
-                case COMMAND_BYE:
-                    executeCommand(new InvalidCommand());
-                    break;
-                case COMMAND_LIST:
-                    if (command.parts().length == 1) {
-                        executeCommand(new ListCommand());
-                    } else {
-                        executeCommand(new InvalidCommand());
-                    }
-                    break;
-                case COMMAND_DELETE:
-                    // Fallthrough
-                case COMMAND_MARK:
-                    // Fallthrough
-                case COMMAND_UNMARK:
-                    handleNumberedTaskCommand(command);
-                    break;
-                case COMMAND_CLEAR:
-                    if (command.parts().length == 1) {
-                        executeCommand(new ClearCommand());
-                    } else {
-                        executeCommand(new InvalidCommand());
-                    }
-                    break;
-                case COMMAND_HELP:
-                    if (command.parts().length == 1) {
-                        executeCommand(new HelpCommand());
-                    } else {
-                        executeCommand(new InvalidCommand());
-                    }
-                    break;
-                case COMMAND_TODO:
-                    // Fallthrough
-                case COMMAND_DEADLINE:
-                    // Fallthrough
-                case COMMAND_EVENT:
-                    handleAddTaskCommand(command);
-                    break;
-                default:
-                    executeCommand(new InvalidCommand());
-                    break;
-            }
-        }
-
-        ui.showHorizontalLine();
-    }
-
-    /**
-     * Executes a command using this Ernest instance's components.
-     *
-     * @param command command to execute.
-     */
-    private void executeCommand(Command command) {
-        command.execute(taskList, ui, storage);
-    }
-
-    /**
-     * Handles a command that creates and adds a task.
-     *
-     * @param command parsed task command.
-     */
-    private void handleAddTaskCommand(Parser.ParsedCommand command) {
-        Parser.TaskParseResult parseResult = Parser.parseTask(command);
-        if (parseResult.status() == Parser.TaskParseStatus.SUCCESS) {
-            executeCommand(new AddCommand(parseResult.task().orElseThrow()));
-        } else {
-            ui.showTaskParsingErrorMessage(parseResult.status());
-        }
-    }
-
-    /**
-     * Handles a task command that requires a numeric task argument.
-     *
-     * @param command parsed numbered task command.
-     */
-    private void handleNumberedTaskCommand(Parser.ParsedCommand command) {
-        Parser.TaskNumberParseResult parseResult = Parser.parseTaskNumber(command);
-
-        switch (parseResult.status()) {
-            case MISSING:
-                ui.showMissingTaskNumberMessage();
-                break;
-            case NOT_INTEGER:
-                ui.showNonIntegerTaskNumberMessage();
-                break;
-            case VALID:
-                executeNumberedTaskCommand(command.parts()[0], parseResult.taskNumber());
-                break;
-        }
-    }
-
-    /**
-     * Executes a numbered task command using an already parsed task number.
-     *
-     * @param commandWord normalized command word.
-     * @param taskNumber parsed task number.
-     */
-    private void executeNumberedTaskCommand(String commandWord, int taskNumber) {
-        switch (commandWord) {
-            case COMMAND_DELETE:
-                executeCommand(new DeleteCommand(taskNumber));
-                break;
-            case COMMAND_MARK:
-                executeCommand(new MarkCommand(taskNumber));
-                break;
-            case COMMAND_UNMARK:
-                executeCommand(new UnmarkCommand(taskNumber));
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported numbered command: " + commandWord);
-        }
-    }
-
 }

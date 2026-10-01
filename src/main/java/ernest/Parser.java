@@ -4,12 +4,22 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Converts raw user input into a form that Ernest can process.
+ * Converts raw user input into commands that Ernest can execute.
  */
 public final class Parser {
-    private static final String TODO_PREFIX = "todo ";
-    private static final String DEADLINE_PREFIX = "deadline ";
-    private static final String EVENT_PREFIX = "event ";
+    private static final String COMMAND_BYE = "bye";
+    private static final String COMMAND_LIST = "list";
+    private static final String COMMAND_DELETE = "delete";
+    private static final String COMMAND_MARK = "mark";
+    private static final String COMMAND_UNMARK = "unmark";
+    private static final String COMMAND_CLEAR = "clear";
+    private static final String COMMAND_HELP = "help";
+    private static final String COMMAND_TODO = "todo";
+    private static final String COMMAND_DEADLINE = "deadline";
+    private static final String COMMAND_EVENT = "event";
+    private static final String TODO_PREFIX = COMMAND_TODO + " ";
+    private static final String DEADLINE_PREFIX = COMMAND_DEADLINE + " ";
+    private static final String EVENT_PREFIX = COMMAND_EVENT + " ";
     private static final String DEADLINE_MARKER = "/by";
     private static final String EVENT_FROM_MARKER = "/from";
     private static final String EVENT_TO_MARKER = "/to";
@@ -19,17 +29,95 @@ public final class Parser {
     }
 
     /**
-     * Trims and normalizes a command while preserving its original casing.
+     * Returns the command represented by a line of user input.
      *
      * @param commandLine command entered by the user.
-     * @return the parsed command text and its normalized parts.
+     * @return command represented by the input.
      */
-    public static ParsedCommand parse(String commandLine) {
+    public static Command parse(String commandLine) {
+        ParsedCommand command = parseInput(commandLine);
+        if (command.parts().length == 0) {
+            return new InvalidCommand();
+        }
+
+        String commandWord = command.parts()[0];
+        switch (commandWord) {
+            case COMMAND_BYE:
+                return command.parts().length == 1 ? new ExitCommand() : new InvalidCommand();
+            case COMMAND_LIST:
+                return command.parts().length == 1 ? new ListCommand() : new InvalidCommand();
+            case COMMAND_DELETE:
+                // Fallthrough
+            case COMMAND_MARK:
+                // Fallthrough
+            case COMMAND_UNMARK:
+                return parseNumberedCommand(command);
+            case COMMAND_CLEAR:
+                return command.parts().length == 1 ? new ClearCommand() : new InvalidCommand();
+            case COMMAND_HELP:
+                return command.parts().length == 1 ? new HelpCommand() : new InvalidCommand();
+            case COMMAND_TODO:
+                // Fallthrough
+            case COMMAND_DEADLINE:
+                // Fallthrough
+            case COMMAND_EVENT:
+                return parseAddCommand(command);
+            default:
+                return new InvalidCommand();
+        }
+    }
+
+    /**
+     * Trims and normalizes command text while preserving its original casing.
+     *
+     * @param commandLine command entered by the user.
+     * @return parsed command text and its normalized parts.
+     */
+    private static ParsedCommand parseInput(String commandLine) {
         String trimmedCommand = commandLine.strip();
         String normalizedCommand = trimmedCommand.toLowerCase(Locale.ROOT);
         String[] commandParts = normalizedCommand.isEmpty()
                 ? new String[0] : normalizedCommand.split("\\s+", 2);
         return new ParsedCommand(trimmedCommand, commandParts);
+    }
+
+    /**
+     * Returns an add command or a task parsing error command.
+     *
+     * @param command parsed task-creation command.
+     * @return executable command represented by the input.
+     */
+    private static Command parseAddCommand(ParsedCommand command) {
+        TaskParseResult result = parseTask(command);
+        if (result.status() == TaskParseStatus.SUCCESS) {
+            return new AddCommand(result.task().orElseThrow());
+        }
+        return new TaskParsingErrorCommand(result.status());
+    }
+
+    /**
+     * Returns a numbered task command or a task number error command.
+     *
+     * @param command parsed command containing a task number.
+     * @return executable command represented by the input.
+     */
+    private static Command parseNumberedCommand(ParsedCommand command) {
+        TaskNumberParseResult result = parseTaskNumber(command);
+        if (result.status() != TaskNumberStatus.VALID) {
+            return new TaskNumberErrorCommand(result.status());
+        }
+
+        int taskNumber = result.taskNumber();
+        switch (command.parts()[0]) {
+            case COMMAND_DELETE:
+                return new DeleteCommand(taskNumber);
+            case COMMAND_MARK:
+                return new MarkCommand(taskNumber);
+            case COMMAND_UNMARK:
+                return new UnmarkCommand(taskNumber);
+            default:
+                throw new IllegalArgumentException("Unsupported numbered command: " + command.parts()[0]);
+        }
     }
 
     /**
