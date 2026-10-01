@@ -102,7 +102,7 @@ public final class Ernest {
                     break;
                 case COMMAND_LIST:
                     if (command.parts().length == 1) {
-                        ui.showTaskList(taskList.getTasks());
+                        executeCommand(new ListCommand());
                     } else {
                         ui.showInvalidCommandMessage();
                     }
@@ -125,7 +125,7 @@ public final class Ernest {
                     break;
                 case COMMAND_HELP:
                     if (command.parts().length == 1) {
-                        ui.showHelpMessage();
+                        executeCommand(new HelpCommand());
                     } else {
                         ui.showInvalidCommandMessage();
                     }
@@ -144,6 +144,15 @@ public final class Ernest {
         }
 
         ui.showHorizontalLine();
+    }
+
+    /**
+     * Executes a command using this Ernest instance's components.
+     *
+     * @param command command to execute.
+     */
+    private void executeCommand(Command command) {
+        command.execute(taskList, ui, storage);
     }
 
     /**
