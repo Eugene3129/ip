@@ -3,6 +3,7 @@ package ernest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Stores and manages the tasks in Ernest's to-do list.
@@ -64,50 +65,45 @@ public final class TaskList {
     }
 
     /**
-     * Marks a task as done and returns its number when the number is valid.
+     * Marks a task as done when the task exists and is not already done.
      *
      * @param taskNumber one-based number of the task to mark.
-     * @return marked task number, or {@code null} when the task could not be marked.
+     * @return outcome of the mark operation.
      */
-    public Integer markTask(int taskNumber) {
+    public MarkStatus markTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
-            printInvalidTaskNumberMessage();
-            return null;
+            return MarkStatus.INVALID_TASK_NUMBER;
         }
 
         if (task.isDone()) {
-            System.out.println("Sorry, task " + taskNumber + " is already done.");
-            return null;
+            return MarkStatus.ALREADY_DONE;
         }
 
         task.setDone(true);
         saveTasks();
-        return taskNumber;
+        return MarkStatus.SUCCESS;
     }
 
     /**
-     * Marks a task as not done and returns its number when the number is valid.
+     * Marks a task as not done when the task exists and is currently done.
      *
      * @param taskNumber one-based number of the task to unmark.
-     * @return unmarked task number, or {@code null} when the task could not be unmarked.
+     * @return outcome of the unmark operation.
      */
-    public Integer unmarkTask(int taskNumber) {
+    public UnmarkStatus unmarkTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
-            printInvalidTaskNumberMessage();
-            return null;
+            return UnmarkStatus.INVALID_TASK_NUMBER;
         }
 
         if (!task.isDone()) {
-            System.out.println("Sorry, task " + taskNumber
-                    + " is already marked as not done yet.");
-            return null;
+            return UnmarkStatus.ALREADY_NOT_DONE;
         }
 
         task.setDone(false);
         saveTasks();
-        return taskNumber;
+        return UnmarkStatus.SUCCESS;
     }
 
     /**
@@ -136,21 +132,20 @@ public final class TaskList {
     }
 
     /**
-     * Deletes and returns a task when the task number is valid.
+     * Deletes a task when the task number is valid.
      *
      * @param taskNumber one-based number of the task to delete.
-     * @return deleted task, or {@code null} when the command does not identify a task.
+     * @return deleted task, or an empty result when the task number is invalid.
      */
-    public Task deleteTask(int taskNumber) {
+    public Optional<Task> deleteTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
-            printInvalidTaskNumberMessage();
-            return null;
+            return Optional.empty();
         }
 
         tasks.remove(taskNumber - 1);
         saveTasks();
-        return task;
+        return Optional.of(task);
     }
 
     /**
@@ -289,13 +284,6 @@ public final class TaskList {
     }
 
     /**
-     * Prints the message used when a task number does not identify a stored task.
-     */
-    private void printInvalidTaskNumberMessage() {
-        System.out.println("Invalid task number. Please refer to the task list and try again.");
-    }
-
-    /**
      * Returns the position of a marker that is separated from surrounding text.
      *
      * @param command normalized command to search.
@@ -351,5 +339,23 @@ public final class TaskList {
      */
     private boolean isValidTaskNumber(int taskNumber) {
         return taskNumber >= 1 && taskNumber <= tasks.size();
+    }
+
+    /**
+     * Describes the outcome of marking a task as done.
+     */
+    public enum MarkStatus {
+        SUCCESS,
+        INVALID_TASK_NUMBER,
+        ALREADY_DONE
+    }
+
+    /**
+     * Describes the outcome of marking a task as not done.
+     */
+    public enum UnmarkStatus {
+        SUCCESS,
+        INVALID_TASK_NUMBER,
+        ALREADY_NOT_DONE
     }
 }

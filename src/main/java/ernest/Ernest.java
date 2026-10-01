@@ -1,5 +1,7 @@
 package ernest;
 
+import java.util.Optional;
+
 /**
  * Runs Ernest, a simple command-line task manager.
  */
@@ -172,26 +174,71 @@ public final class Ernest {
     private void executeNumberedTaskCommand(String commandWord, int taskNumber) {
         switch (commandWord) {
             case COMMAND_DELETE:
-                Task deletedTask = taskList.deleteTask(taskNumber);
-                if (deletedTask != null) {
-                    ui.showTaskDeletedMessage(deletedTask, taskList.getTaskCount(),
-                            taskList.getMaximumTaskCount());
-                }
+                deleteTask(taskNumber);
                 break;
             case COMMAND_MARK:
-                Integer markedTaskNumber = taskList.markTask(taskNumber);
-                if (markedTaskNumber != null) {
-                    ui.showTaskMarkedMessage(markedTaskNumber);
-                }
+                markTask(taskNumber);
                 break;
             case COMMAND_UNMARK:
-                Integer unmarkedTaskNumber = taskList.unmarkTask(taskNumber);
-                if (unmarkedTaskNumber != null) {
-                    ui.showTaskUnmarkedMessage(unmarkedTaskNumber);
-                }
+                unmarkTask(taskNumber);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported numbered command: " + commandWord);
+        }
+    }
+
+    /**
+     * Deletes a task and shows the corresponding result.
+     *
+     * @param taskNumber one-based number of the task to delete.
+     */
+    private void deleteTask(int taskNumber) {
+        Optional<Task> deletedTask = taskList.deleteTask(taskNumber);
+        if (deletedTask.isPresent()) {
+            ui.showTaskDeletedMessage(deletedTask.get(), taskList.getTaskCount(),
+                    taskList.getMaximumTaskCount());
+        } else {
+            ui.showInvalidTaskNumberMessage();
+        }
+    }
+
+    /**
+     * Marks a task and shows the corresponding result.
+     *
+     * @param taskNumber one-based number of the task to mark.
+     */
+    private void markTask(int taskNumber) {
+        TaskList.MarkStatus status = taskList.markTask(taskNumber);
+        switch (status) {
+            case SUCCESS:
+                ui.showTaskMarkedMessage(taskNumber);
+                break;
+            case INVALID_TASK_NUMBER:
+                ui.showInvalidTaskNumberMessage();
+                break;
+            case ALREADY_DONE:
+                ui.showTaskAlreadyDoneMessage(taskNumber);
+                break;
+        }
+    }
+
+    /**
+     * Unmarks a task and shows the corresponding result.
+     *
+     * @param taskNumber one-based number of the task to unmark.
+     */
+    private void unmarkTask(int taskNumber) {
+        TaskList.UnmarkStatus status = taskList.unmarkTask(taskNumber);
+        switch (status) {
+            case SUCCESS:
+                ui.showTaskUnmarkedMessage(taskNumber);
+                break;
+            case INVALID_TASK_NUMBER:
+                ui.showInvalidTaskNumberMessage();
+                break;
+            case ALREADY_NOT_DONE:
+                ui.showTaskAlreadyNotDoneMessage(taskNumber);
+                break;
         }
     }
 }

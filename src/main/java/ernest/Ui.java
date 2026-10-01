@@ -97,6 +97,13 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows a message explaining that a task number is outside the task list.
+     */
+    public void showInvalidTaskNumberMessage() {
+        System.out.println("Invalid task number. Please refer to the task list and try again.");
+    }
+
+    /**
      * Shows all tasks and their completion status.
      *
      * @param tasks tasks to display in list order.
@@ -151,12 +158,30 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows a message explaining that a task is already done.
+     *
+     * @param taskNumber one-based number of the task.
+     */
+    public void showTaskAlreadyDoneMessage(int taskNumber) {
+        System.out.println("Sorry, task " + taskNumber + " is already done.");
+    }
+
+    /**
      * Shows confirmation that a task was marked as not done.
      *
      * @param taskNumber one-based number of the unmarked task.
      */
     public void showTaskUnmarkedMessage(int taskNumber) {
         System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
+    }
+
+    /**
+     * Shows a message explaining that a task is already not done.
+     *
+     * @param taskNumber one-based number of the task.
+     */
+    public void showTaskAlreadyNotDoneMessage(int taskNumber) {
+        System.out.println("Sorry, task " + taskNumber + " is already marked as not done yet.");
     }
 
     /**
