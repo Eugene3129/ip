@@ -97,7 +97,11 @@ public final class Ernest {
                     }
                     break;
                 case COMMAND_DELETE:
-                    taskList.deleteTask(command.text());
+                    Task deletedTask = taskList.deleteTask(command.text());
+                    if (deletedTask != null) {
+                        ui.showTaskDeletedMessage(deletedTask, taskList.getTaskCount(),
+                                taskList.getMaximumTaskCount());
+                    }
                     break;
                 case COMMAND_MARK:
                     taskList.markTask(command.text());

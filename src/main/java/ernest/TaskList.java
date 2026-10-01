@@ -41,6 +41,24 @@ public final class TaskList {
     }
 
     /**
+     * Returns the number of stored tasks.
+     *
+     * @return number of stored tasks.
+     */
+    public int getTaskCount() {
+        return tasks.size();
+    }
+
+    /**
+     * Returns the maximum number of tasks that can be stored.
+     *
+     * @return maximum number of tasks.
+     */
+    public int getMaximumTaskCount() {
+        return MAX_TASKS;
+    }
+
+    /**
      * Removes every task from the list and saves the empty list.
      */
     public void clearTasks() {
@@ -129,26 +147,26 @@ public final class TaskList {
     }
 
     /**
-     * Deletes a task when the command contains a valid task number.
+     * Deletes and returns a task when the command contains a valid task number.
      *
      * @param command delete command entered by the user.
+     * @return deleted task, or {@code null} when the command does not identify a task.
      */
-    public void deleteTask(String command) {
+    public Task deleteTask(String command) {
         Integer taskNumber = getTaskNumber(command, DELETE_COMMAND);
         if (taskNumber == null) {
-            return;
+            return null;
         }
 
         Task task = getTask(taskNumber);
         if (task == null) {
             printInvalidTaskNumberMessage();
-            return;
+            return null;
         }
 
         tasks.remove(taskNumber - 1);
         saveTasks();
-        System.out.println("Ok, I've deleted this task from the task list:\n> " + task);
-        System.out.println("Current list size: " + tasks.size() + "/" + MAX_TASKS);
+        return task;
     }
 
     /**

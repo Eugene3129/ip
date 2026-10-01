@@ -104,6 +104,18 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows the task removed from the list and the remaining capacity.
+     *
+     * @param task deleted task.
+     * @param taskCount number of tasks remaining in the list.
+     * @param maximumTaskCount maximum number of tasks allowed in the list.
+     */
+    public void showTaskDeletedMessage(Task task, int taskCount, int maximumTaskCount) {
+        System.out.println("Ok, I've deleted this task from the task list:\n> " + task);
+        System.out.println("Current list size: " + taskCount + "/" + maximumTaskCount);
+    }
+
+    /**
      * Shows the commands supported by Ernest.
      */
     public void showHelpMessage() {
