@@ -21,4 +21,17 @@ public abstract class Command {
     public boolean isExit() {
         return false;
     }
+
+    /**
+     * Saves the task list and displays a warning if saving fails.
+     *
+     * @param taskList task list to save.
+     * @param ui user interface through which to display a warning.
+     * @param storage storage to which the tasks are saved.
+     */
+    protected final void saveTasks(TaskList taskList, Ui ui, Storage storage) {
+        if (!storage.saveTasks(taskList.getTasks())) {
+            ui.showSaveErrorMessage();
+        }
+    }
 }

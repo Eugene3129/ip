@@ -69,8 +69,11 @@ public final class Ernest {
             Parser.ParsedCommand command = Parser.parse(ui.readCommand());
 
             if (isExitCommand(command)) {
-                ui.showGoodbyeMessage();
-                return;
+                Command exitCommand = new ExitCommand();
+                executeCommand(exitCommand);
+                if (exitCommand.isExit()) {
+                    return;
+                }
             }
             handleCommand(command);
         }
@@ -93,18 +96,18 @@ public final class Ernest {
      */
     private void handleCommand(Parser.ParsedCommand command) {
         if (command.parts().length == 0) {
-            ui.showInvalidCommandMessage();
+            executeCommand(new InvalidCommand());
         } else {
             String commandWord = command.parts()[0];
             switch (commandWord) {
                 case COMMAND_BYE:
-                    ui.showInvalidCommandMessage();
+                    executeCommand(new InvalidCommand());
                     break;
                 case COMMAND_LIST:
                     if (command.parts().length == 1) {
                         executeCommand(new ListCommand());
                     } else {
-                        ui.showInvalidCommandMessage();
+                        executeCommand(new InvalidCommand());
                     }
                     break;
                 case COMMAND_DELETE:
@@ -116,18 +119,16 @@ public final class Ernest {
                     break;
                 case COMMAND_CLEAR:
                     if (command.parts().length == 1) {
-                        taskList.clearTasks();
-                        saveTasks();
-                        ui.showTaskListClearedMessage();
+                        executeCommand(new ClearCommand());
                     } else {
-                        ui.showInvalidCommandMessage();
+                        executeCommand(new InvalidCommand());
                     }
                     break;
                 case COMMAND_HELP:
                     if (command.parts().length == 1) {
                         executeCommand(new HelpCommand());
                     } else {
-                        ui.showInvalidCommandMessage();
+                        executeCommand(new InvalidCommand());
                     }
                     break;
                 case COMMAND_TODO:
@@ -138,7 +139,7 @@ public final class Ernest {
                     handleAddTaskCommand(command);
                     break;
                 default:
-                    ui.showInvalidCommandMessage();
+                    executeCommand(new InvalidCommand());
                     break;
             }
         }
