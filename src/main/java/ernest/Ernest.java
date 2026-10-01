@@ -1,6 +1,5 @@
 package ernest;
 
-import java.util.Locale;
 import java.util.Scanner;
 
 /**
@@ -19,6 +18,17 @@ public final class Ernest {
 
     /** Name displayed by the chatbot. */
     private static final String CHATBOT_NAME = "Ernest";
+
+    private static final String COMMAND_BYE = "bye";
+    private static final String COMMAND_LIST = "list";
+    private static final String COMMAND_DELETE = "delete";
+    private static final String COMMAND_MARK = "mark";
+    private static final String COMMAND_UNMARK = "unmark";
+    private static final String COMMAND_CLEAR = "clear";
+    private static final String COMMAND_HELP = "help";
+    private static final String COMMAND_TODO = "todo";
+    private static final String COMMAND_DEADLINE = "deadline";
+    private static final String COMMAND_EVENT = "event";
 
     private Ernest() {
         // Prevent instantiation of this utility class.
@@ -69,71 +79,68 @@ public final class Ernest {
     /**
      * Processes one command and prints the corresponding response.
      *
-     * @param command command entered by the user.
+     * @param commandLine command entered by the user.
      * @param taskList task list to update or display.
      * @return false when the command ends the chat; otherwise true.
      */
-    private static boolean processCommand(String command, TaskList taskList) {
-        String trimmedCommand = command.strip();
-        String normalizedCommand = trimmedCommand.toLowerCase(Locale.ROOT);
-        String[] commandParts = normalizedCommand.isEmpty()
-                ? new String[0] : normalizedCommand.split("\\s+", 2);
+    private static boolean processCommand(String commandLine, TaskList taskList) {
+        Parser.ParsedCommand command = Parser.parse(commandLine);
 
-        if (commandParts.length == 0) {
+        if (command.parts().length == 0) {
             System.out.println("Sorry, please insert a valid command.");
         } else {
-            String commandWord = commandParts[0];
+            String commandWord = command.parts()[0];
             switch (commandWord) {
-            case "bye":
-                if (commandParts.length == 1) {
-                    return false;
-                }
-                System.out.println("Sorry, please insert a valid command.");
-                break;
-            case "list":
-                if (commandParts.length == 1) {
-                    taskList.listTasks();
-                } else {
+                case COMMAND_BYE:
+                    if (command.parts().length == 1) {
+                        return false;
+                    }
                     System.out.println("Sorry, please insert a valid command.");
-                }
-                break;
-            case "delete":
-                taskList.deleteTask(trimmedCommand);
-                break;
-            case "mark":
-                taskList.markTask(trimmedCommand);
-                break;
-            case "unmark":
-                taskList.unmarkTask(trimmedCommand);
-                break;
-            case "clear":
-                if (commandParts.length == 1) {
-                    taskList.clearTasks();
-                } else {
+                    break;
+                case COMMAND_LIST:
+                    if (command.parts().length == 1) {
+                        taskList.listTasks();
+                    } else {
+                        System.out.println("Sorry, please insert a valid command.");
+                    }
+                    break;
+                case COMMAND_DELETE:
+                    taskList.deleteTask(command.text());
+                    break;
+                case COMMAND_MARK:
+                    taskList.markTask(command.text());
+                    break;
+                case COMMAND_UNMARK:
+                    taskList.unmarkTask(command.text());
+                    break;
+                case COMMAND_CLEAR:
+                    if (command.parts().length == 1) {
+                        taskList.clearTasks();
+                    } else {
+                        System.out.println("Sorry, please insert a valid command.");
+                    }
+                    break;
+                case COMMAND_HELP:
+                    if (command.parts().length == 1) {
+                        printHelpMessage();
+                    } else {
+                        System.out.println("Sorry, please insert a valid command.");
+                    }
+                    break;
+                case COMMAND_TODO:
+                    // Fallthrough
+                case COMMAND_DEADLINE:
+                    // Fallthrough
+                case COMMAND_EVENT:
+                    if (command.parts().length == 1) {
+                        System.out.println("Missing task description. Please try again.");
+                    } else {
+                        taskList.addTask(command.text());
+                    }
+                    break;
+                default:
                     System.out.println("Sorry, please insert a valid command.");
-                }
-                break;
-            case "help":
-                if (commandParts.length == 1) {
-                    printHelpMessage();
-                } else {
-                    System.out.println("Sorry, please insert a valid command.");
-                }
-                break;
-            case "todo":
-                // Fallthrough
-            case "deadline":
-                // Fallthrough
-            case "event":
-                if (commandParts.length == 1) {
-                    System.out.println("Missing task description. Please try again.");
-                } else {
-                    taskList.addTask(trimmedCommand);
-                }
-                break;
-            default:
-                System.out.println("Sorry, please insert a valid command.");
-                break;
+                    break;
             }
         }
 
