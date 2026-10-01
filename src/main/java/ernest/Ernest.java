@@ -6,6 +6,7 @@ import java.util.Optional;
  * Runs Ernest, a simple command-line task manager.
  */
 public final class Ernest {
+    private static final String DEFAULT_DATA_FILE_PATH = "data/ernest.txt";
     private static final String COMMAND_BYE = "bye";
     private static final String COMMAND_LIST = "list";
     private static final String COMMAND_DELETE = "delete";
@@ -17,6 +18,9 @@ public final class Ernest {
     private static final String COMMAND_DEADLINE = "deadline";
     private static final String COMMAND_EVENT = "event";
 
+    /** Storage used to load and save tasks. */
+    private final Storage storage;
+
     /** Task list managed by this Ernest instance. */
     private final TaskList taskList;
 
@@ -24,11 +28,14 @@ public final class Ernest {
     private final Ui ui;
 
     /**
-     * Creates an Ernest task manager with its task list and user interface.
+     * Creates an Ernest task manager backed by a specified data file.
+     *
+     * @param filePath path of the task data file.
      */
-    public Ernest() {
+    public Ernest(String filePath) {
         this.ui = new Ui();
-        Storage.LoadResult loadResult = Storage.loadTasks(TaskList.getMaximumTaskCapacity());
+        this.storage = new Storage(filePath);
+        Storage.LoadResult loadResult = storage.loadTasks(TaskList.getMaximumTaskCapacity());
         this.taskList = new TaskList(loadResult.tasks());
         this.ui.showTaskLoadingStatus(loadResult.status());
     }
@@ -39,7 +46,7 @@ public final class Ernest {
      * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
-        new Ernest().run();
+        new Ernest(DEFAULT_DATA_FILE_PATH).run();
     }
 
     /**
@@ -109,8 +116,8 @@ public final class Ernest {
                     break;
                 case COMMAND_CLEAR:
                     if (command.parts().length == 1) {
-                        TaskList.OperationResult<Integer> result = taskList.clearTasks();
-                        showSaveWarning(result);
+                        taskList.clearTasks();
+                        saveTasks();
                         ui.showTaskListClearedMessage();
                     } else {
                         ui.showInvalidCommandMessage();
@@ -159,11 +166,10 @@ public final class Ernest {
      * @param task parsed task to add.
      */
     private void addTask(Task task) {
-        TaskList.OperationResult<TaskList.AddStatus> result = taskList.addTask(task);
-        showSaveWarning(result);
-
-        switch (result.outcome()) {
+        TaskList.AddStatus status = taskList.addTask(task);
+        switch (status) {
             case SUCCESS:
+                saveTasks();
                 ui.showTaskAddedMessage(task, taskList.getTaskCount(),
                         taskList.getMaximumTaskCount());
                 break;
@@ -223,11 +229,9 @@ public final class Ernest {
      * @param taskNumber one-based number of the task to delete.
      */
     private void deleteTask(int taskNumber) {
-        TaskList.OperationResult<Optional<Task>> result = taskList.deleteTask(taskNumber);
-        showSaveWarning(result);
-
-        Optional<Task> deletedTask = result.outcome();
+        Optional<Task> deletedTask = taskList.deleteTask(taskNumber);
         if (deletedTask.isPresent()) {
+            saveTasks();
             ui.showTaskDeletedMessage(deletedTask.get(), taskList.getTaskCount(),
                     taskList.getMaximumTaskCount());
         } else {
@@ -241,11 +245,10 @@ public final class Ernest {
      * @param taskNumber one-based number of the task to mark.
      */
     private void markTask(int taskNumber) {
-        TaskList.OperationResult<TaskList.MarkStatus> result = taskList.markTask(taskNumber);
-        showSaveWarning(result);
-
-        switch (result.outcome()) {
+        TaskList.MarkStatus status = taskList.markTask(taskNumber);
+        switch (status) {
             case SUCCESS:
+                saveTasks();
                 ui.showTaskMarkedMessage(taskNumber);
                 break;
             case INVALID_TASK_NUMBER:
@@ -263,11 +266,10 @@ public final class Ernest {
      * @param taskNumber one-based number of the task to unmark.
      */
     private void unmarkTask(int taskNumber) {
-        TaskList.OperationResult<TaskList.UnmarkStatus> result = taskList.unmarkTask(taskNumber);
-        showSaveWarning(result);
-
-        switch (result.outcome()) {
+        TaskList.UnmarkStatus status = taskList.unmarkTask(taskNumber);
+        switch (status) {
             case SUCCESS:
+                saveTasks();
                 ui.showTaskUnmarkedMessage(taskNumber);
                 break;
             case INVALID_TASK_NUMBER:
@@ -280,12 +282,10 @@ public final class Ernest {
     }
 
     /**
-     * Shows a warning when a task-list mutation could not be saved.
-     *
-     * @param result task-list operation result to check.
+     * Saves the current task list and shows a warning if saving fails.
      */
-    private void showSaveWarning(TaskList.OperationResult<?> result) {
-        if (result.hasSaveFailure()) {
+    private void saveTasks() {
+        if (!storage.saveTasks(taskList.getTasks())) {
             ui.showSaveErrorMessage();
         }
     }

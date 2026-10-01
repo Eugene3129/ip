@@ -10,13 +10,19 @@ import java.util.List;
  * Saves and loads Ernest task lists from the local data file.
  */
 public final class Storage {
-    /** Location of the task data file relative to the project root. */
-    private static final Path DATA_FILE_PATH = Path.of("data", "ernest.txt");
     private static final String CSV_HEADER = "type,isDone,description,deadline,startTime,endTime";
     private static final int CSV_FIELD_COUNT = 6;
 
-    private Storage() {
-        // Prevent instantiation of this utility class.
+    /** Location of this storage instance's task data file. */
+    private final Path dataFilePath;
+
+    /**
+     * Creates storage that reads and writes a specified data file.
+     *
+     * @param filePath path of the task data file.
+     */
+    public Storage(String filePath) {
+        this.dataFilePath = Path.of(filePath);
     }
 
     /**
@@ -25,7 +31,7 @@ public final class Storage {
      * @param tasks tasks to save.
      * @return true if the tasks were saved; otherwise false.
      */
-    public static boolean saveTasks(List<Task> tasks) {
+    public boolean saveTasks(List<Task> tasks) {
         List<String> records = new ArrayList<>();
         records.add(CSV_HEADER);
         for (Task task : tasks) {
@@ -33,8 +39,11 @@ public final class Storage {
         }
 
         try {
-            Files.createDirectories(DATA_FILE_PATH.getParent());
-            Files.write(DATA_FILE_PATH, records);
+            Path parentDirectory = dataFilePath.getParent();
+            if (parentDirectory != null) {
+                Files.createDirectories(parentDirectory);
+            }
+            Files.write(dataFilePath, records);
             return true;
         } catch (IOException | SecurityException exception) {
             return false;
@@ -46,17 +55,17 @@ public final class Storage {
      *
      * @return tasks read from the data file.
      */
-    public static LoadResult loadTasks(int maximumTasks) {
+    public LoadResult loadTasks(int maximumTasks) {
         ArrayList<Task> tasks = new ArrayList<>();
         if (maximumTasks <= 0) {
             return new LoadResult(tasks, LoadStatus.SUCCESS);
         }
 
         try {
-            if (!Files.exists(DATA_FILE_PATH)) {
+            if (!Files.exists(dataFilePath)) {
                 return new LoadResult(tasks, LoadStatus.SUCCESS);
             }
-            List<String> records = Files.readAllLines(DATA_FILE_PATH);
+            List<String> records = Files.readAllLines(dataFilePath);
             if (records.isEmpty()) {
                 return new LoadResult(tasks, LoadStatus.SUCCESS);
             }

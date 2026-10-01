@@ -61,97 +61,81 @@ public final class TaskList {
     }
 
     /**
-     * Removes every task from the list and saves the empty list.
-     *
-     * @return operation result containing the number of removed tasks and save status.
+     * Removes every task from the list.
      */
-    public OperationResult<Integer> clearTasks() {
-        int clearedTaskCount = tasks.size();
+    public void clearTasks() {
         tasks.clear();
-        return saveMutation(clearedTaskCount);
     }
 
     /**
      * Marks a task as done when the task exists and is not already done.
      *
      * @param taskNumber one-based number of the task to mark.
-     * @return operation result containing the mark outcome and save status.
+     * @return outcome of the mark operation.
      */
-    public OperationResult<MarkStatus> markTask(int taskNumber) {
+    public MarkStatus markTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
-            return new OperationResult<>(MarkStatus.INVALID_TASK_NUMBER, false);
+            return MarkStatus.INVALID_TASK_NUMBER;
         }
 
         if (task.isDone()) {
-            return new OperationResult<>(MarkStatus.ALREADY_DONE, false);
+            return MarkStatus.ALREADY_DONE;
         }
 
         task.setDone(true);
-        return saveMutation(MarkStatus.SUCCESS);
+        return MarkStatus.SUCCESS;
     }
 
     /**
      * Marks a task as not done when the task exists and is currently done.
      *
      * @param taskNumber one-based number of the task to unmark.
-     * @return operation result containing the unmark outcome and save status.
+     * @return outcome of the unmark operation.
      */
-    public OperationResult<UnmarkStatus> unmarkTask(int taskNumber) {
+    public UnmarkStatus unmarkTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
-            return new OperationResult<>(UnmarkStatus.INVALID_TASK_NUMBER, false);
+            return UnmarkStatus.INVALID_TASK_NUMBER;
         }
 
         if (!task.isDone()) {
-            return new OperationResult<>(UnmarkStatus.ALREADY_NOT_DONE, false);
+            return UnmarkStatus.ALREADY_NOT_DONE;
         }
 
         task.setDone(false);
-        return saveMutation(UnmarkStatus.SUCCESS);
+        return UnmarkStatus.SUCCESS;
     }
 
     /**
      * Adds a task when the list has space.
      *
      * @param task task to add.
-     * @return operation result containing the add outcome and save status.
+     * @return outcome of the add operation.
      */
-    public OperationResult<AddStatus> addTask(Task task) {
+    public AddStatus addTask(Task task) {
         if (tasks.size() >= MAX_TASKS) {
-            return new OperationResult<>(AddStatus.FULL, false);
+            return AddStatus.FULL;
         }
 
         tasks.add(task);
-        return saveMutation(AddStatus.SUCCESS);
+        return AddStatus.SUCCESS;
     }
 
     /**
      * Deletes a task when the task number is valid.
      *
      * @param taskNumber one-based number of the task to delete.
-     * @return operation result containing the deleted task and save status.
+     * @return deleted task, or an empty result when the task number is invalid.
      */
-    public OperationResult<Optional<Task>> deleteTask(int taskNumber) {
+    public Optional<Task> deleteTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
-            return new OperationResult<>(Optional.empty(), false);
+            return Optional.empty();
         }
 
         tasks.remove(taskNumber - 1);
-        return saveMutation(Optional.of(task));
-    }
-
-    /**
-     * Saves the current task list and returns an operation result.
-     *
-     * @param outcome domain outcome of the completed mutation.
-     * @param <T> type of the domain outcome.
-     * @return operation result containing the outcome and save status.
-     */
-    private <T> OperationResult<T> saveMutation(T outcome) {
-        boolean hasSaveFailure = !Storage.saveTasks(tasks);
-        return new OperationResult<>(outcome, hasSaveFailure);
+        return Optional.of(task);
     }
 
     /**
@@ -203,13 +187,4 @@ public final class TaskList {
         FULL
     }
 
-    /**
-     * Stores a task-list operation's domain outcome and persistence result.
-     *
-     * @param outcome domain outcome of the operation.
-     * @param hasSaveFailure whether a completed mutation could not be saved.
-     * @param <T> type of the domain outcome.
-     */
-    public record OperationResult<T>(T outcome, boolean hasSaveFailure) {
-    }
 }
