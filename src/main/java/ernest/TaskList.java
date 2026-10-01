@@ -17,9 +17,6 @@ public final class TaskList {
     private static final String DEADLINE_MARKER = "/by";
     private static final String EVENT_FROM_MARKER = "/from";
     private static final String EVENT_TO_MARKER = "/to";
-    private static final String MARK_COMMAND = "mark";
-    private static final String UNMARK_COMMAND = "unmark";
-    private static final String DELETE_COMMAND = "delete";
 
     /** Tasks currently stored in this list. */
     private final ArrayList<Task> tasks;
@@ -67,17 +64,12 @@ public final class TaskList {
     }
 
     /**
-     * Marks a task as done and returns its number when the command is valid.
+     * Marks a task as done and returns its number when the number is valid.
      *
-     * @param command mark command entered by the user.
+     * @param taskNumber one-based number of the task to mark.
      * @return marked task number, or {@code null} when the task could not be marked.
      */
-    public Integer markTask(String command) {
-        Integer taskNumber = getTaskNumber(command, MARK_COMMAND);
-        if (taskNumber == null) {
-            return null;
-        }
-
+    public Integer markTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
             printInvalidTaskNumberMessage();
@@ -95,17 +87,12 @@ public final class TaskList {
     }
 
     /**
-     * Marks a task as not done and returns its number when the command is valid.
+     * Marks a task as not done and returns its number when the number is valid.
      *
-     * @param command unmark command entered by the user.
+     * @param taskNumber one-based number of the task to unmark.
      * @return unmarked task number, or {@code null} when the task could not be unmarked.
      */
-    public Integer unmarkTask(String command) {
-        Integer taskNumber = getTaskNumber(command, UNMARK_COMMAND);
-        if (taskNumber == null) {
-            return null;
-        }
-
+    public Integer unmarkTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
             printInvalidTaskNumberMessage();
@@ -149,17 +136,12 @@ public final class TaskList {
     }
 
     /**
-     * Deletes and returns a task when the command contains a valid task number.
+     * Deletes and returns a task when the task number is valid.
      *
-     * @param command delete command entered by the user.
+     * @param taskNumber one-based number of the task to delete.
      * @return deleted task, or {@code null} when the command does not identify a task.
      */
-    public Task deleteTask(String command) {
-        Integer taskNumber = getTaskNumber(command, DELETE_COMMAND);
-        if (taskNumber == null) {
-            return null;
-        }
-
+    public Task deleteTask(int taskNumber) {
         Task task = getTask(taskNumber);
         if (task == null) {
             printInvalidTaskNumberMessage();
@@ -304,45 +286,6 @@ public final class TaskList {
         }
 
         return "Sorry, please insert a valid task.";
-    }
-
-    /**
-     * Returns an argument when a command has the expected command word.
-     *
-     * @param command complete command entered by the user.
-     * @param commandWord expected command word.
-     * @return stripped command argument, or an empty string when it is missing or malformed.
-     */
-    private String getCommandArgument(String command, String commandWord) {
-        String trimmedCommand = command.strip();
-        if (trimmedCommand.length() <= commandWord.length()
-                || !trimmedCommand.regionMatches(true, 0, commandWord, 0, commandWord.length())
-                || !Character.isWhitespace(trimmedCommand.charAt(commandWord.length()))) {
-            return "";
-        }
-        return trimmedCommand.substring(commandWord.length()).strip();
-    }
-
-    /**
-     * Returns the task number from a command or prints an explanatory message.
-     *
-     * @param command complete command entered by the user.
-     * @param commandWord expected command word.
-     * @return task number, or {@code null} when the argument is missing or invalid.
-     */
-    private Integer getTaskNumber(String command, String commandWord) {
-        String taskNumberText = getCommandArgument(command, commandWord);
-        if (taskNumberText.isEmpty()) {
-            System.out.println("Missing task number. Please refer to the task list and try again.");
-            return null;
-        }
-
-        try {
-            return Integer.parseInt(taskNumberText);
-        } catch (NumberFormatException exception) {
-            System.out.println("Task number must be an integer.");
-            return null;
-        }
     }
 
     /**

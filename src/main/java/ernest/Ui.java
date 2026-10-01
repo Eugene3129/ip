@@ -83,6 +83,20 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows a message explaining that a task number is required.
+     */
+    public void showMissingTaskNumberMessage() {
+        System.out.println("Missing task number. Please refer to the task list and try again.");
+    }
+
+    /**
+     * Shows a message explaining that a task number must be an integer.
+     */
+    public void showNonIntegerTaskNumberMessage() {
+        System.out.println("Task number must be an integer.");
+    }
+
+    /**
      * Shows all tasks and their completion status.
      *
      * @param tasks tasks to display in list order.

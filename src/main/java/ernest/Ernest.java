@@ -97,23 +97,11 @@ public final class Ernest {
                     }
                     break;
                 case COMMAND_DELETE:
-                    Task deletedTask = taskList.deleteTask(command.text());
-                    if (deletedTask != null) {
-                        ui.showTaskDeletedMessage(deletedTask, taskList.getTaskCount(),
-                                taskList.getMaximumTaskCount());
-                    }
-                    break;
+                    // Fallthrough
                 case COMMAND_MARK:
-                    Integer markedTaskNumber = taskList.markTask(command.text());
-                    if (markedTaskNumber != null) {
-                        ui.showTaskMarkedMessage(markedTaskNumber);
-                    }
-                    break;
+                    // Fallthrough
                 case COMMAND_UNMARK:
-                    Integer unmarkedTaskNumber = taskList.unmarkTask(command.text());
-                    if (unmarkedTaskNumber != null) {
-                        ui.showTaskUnmarkedMessage(unmarkedTaskNumber);
-                    }
+                    handleNumberedTaskCommand(command);
                     break;
                 case COMMAND_CLEAR:
                     if (command.parts().length == 1) {
@@ -152,5 +140,58 @@ public final class Ernest {
         }
 
         ui.showHorizontalLine();
+    }
+
+    /**
+     * Handles a task command that requires a numeric task argument.
+     *
+     * @param command parsed numbered task command.
+     */
+    private void handleNumberedTaskCommand(Parser.ParsedCommand command) {
+        Parser.TaskNumberParseResult parseResult = Parser.parseTaskNumber(command);
+
+        switch (parseResult.status()) {
+            case MISSING:
+                ui.showMissingTaskNumberMessage();
+                break;
+            case NOT_INTEGER:
+                ui.showNonIntegerTaskNumberMessage();
+                break;
+            case VALID:
+                executeNumberedTaskCommand(command.parts()[0], parseResult.taskNumber());
+                break;
+        }
+    }
+
+    /**
+     * Executes a numbered task command using an already parsed task number.
+     *
+     * @param commandWord normalized command word.
+     * @param taskNumber parsed task number.
+     */
+    private void executeNumberedTaskCommand(String commandWord, int taskNumber) {
+        switch (commandWord) {
+            case COMMAND_DELETE:
+                Task deletedTask = taskList.deleteTask(taskNumber);
+                if (deletedTask != null) {
+                    ui.showTaskDeletedMessage(deletedTask, taskList.getTaskCount(),
+                            taskList.getMaximumTaskCount());
+                }
+                break;
+            case COMMAND_MARK:
+                Integer markedTaskNumber = taskList.markTask(taskNumber);
+                if (markedTaskNumber != null) {
+                    ui.showTaskMarkedMessage(markedTaskNumber);
+                }
+                break;
+            case COMMAND_UNMARK:
+                Integer unmarkedTaskNumber = taskList.unmarkTask(taskNumber);
+                if (unmarkedTaskNumber != null) {
+                    ui.showTaskUnmarkedMessage(unmarkedTaskNumber);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported numbered command: " + commandWord);
+        }
     }
 }
