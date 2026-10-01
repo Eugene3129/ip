@@ -104,10 +104,16 @@ public final class Ernest {
                     }
                     break;
                 case COMMAND_MARK:
-                    taskList.markTask(command.text());
+                    Integer markedTaskNumber = taskList.markTask(command.text());
+                    if (markedTaskNumber != null) {
+                        ui.showTaskMarkedMessage(markedTaskNumber);
+                    }
                     break;
                 case COMMAND_UNMARK:
-                    taskList.unmarkTask(command.text());
+                    Integer unmarkedTaskNumber = taskList.unmarkTask(command.text());
+                    if (unmarkedTaskNumber != null) {
+                        ui.showTaskUnmarkedMessage(unmarkedTaskNumber);
+                    }
                     break;
                 case COMMAND_CLEAR:
                     if (command.parts().length == 1) {

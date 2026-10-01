@@ -116,6 +116,24 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows confirmation that a task was marked as done.
+     *
+     * @param taskNumber one-based number of the marked task.
+     */
+    public void showTaskMarkedMessage(int taskNumber) {
+        System.out.println("Well done! Marked task " + taskNumber + " as done.");
+    }
+
+    /**
+     * Shows confirmation that a task was marked as not done.
+     *
+     * @param taskNumber one-based number of the unmarked task.
+     */
+    public void showTaskUnmarkedMessage(int taskNumber) {
+        System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
+    }
+
+    /**
      * Shows the commands supported by Ernest.
      */
     public void showHelpMessage() {

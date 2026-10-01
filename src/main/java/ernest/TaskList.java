@@ -67,58 +67,60 @@ public final class TaskList {
     }
 
     /**
-     * Marks a task as done when the command contains a valid task number.
+     * Marks a task as done and returns its number when the command is valid.
      *
      * @param command mark command entered by the user.
+     * @return marked task number, or {@code null} when the task could not be marked.
      */
-    public void markTask(String command) {
+    public Integer markTask(String command) {
         Integer taskNumber = getTaskNumber(command, MARK_COMMAND);
         if (taskNumber == null) {
-            return;
+            return null;
         }
 
         Task task = getTask(taskNumber);
         if (task == null) {
             printInvalidTaskNumberMessage();
-            return;
+            return null;
         }
 
         if (task.isDone()) {
             System.out.println("Sorry, task " + taskNumber + " is already done.");
-            return;
+            return null;
         }
 
         task.setDone(true);
         saveTasks();
-        System.out.println("Well done! Marked task " + taskNumber + " as done.");
+        return taskNumber;
     }
 
     /**
-     * Marks a task as not done when the command contains a valid task number.
+     * Marks a task as not done and returns its number when the command is valid.
      *
      * @param command unmark command entered by the user.
+     * @return unmarked task number, or {@code null} when the task could not be unmarked.
      */
-    public void unmarkTask(String command) {
+    public Integer unmarkTask(String command) {
         Integer taskNumber = getTaskNumber(command, UNMARK_COMMAND);
         if (taskNumber == null) {
-            return;
+            return null;
         }
 
         Task task = getTask(taskNumber);
         if (task == null) {
             printInvalidTaskNumberMessage();
-            return;
+            return null;
         }
 
         if (!task.isDone()) {
             System.out.println("Sorry, task " + taskNumber
                     + " is already marked as not done yet.");
-            return;
+            return null;
         }
 
         task.setDone(false);
         saveTasks();
-        System.out.println("Ok, marked task " + taskNumber + " as not done yet.");
+        return taskNumber;
     }
 
     /**
