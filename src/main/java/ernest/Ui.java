@@ -76,10 +76,54 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
-     * Shows a message explaining that a task description is required.
+     * Shows the reason a task command could not be parsed.
+     *
+     * @param status task parsing failure status.
      */
-    public void showMissingTaskDescriptionMessage() {
-        System.out.println("Missing task description. Please try again.");
+    public void showTaskParsingErrorMessage(Parser.TaskParseStatus status) {
+        switch (status) {
+            case INVALID_TASK_COMMAND:
+                System.out.println("Sorry, please insert a valid task.");
+                break;
+            case MISSING_TASK_DESCRIPTION:
+                System.out.println("Missing task description. Please try again.");
+                break;
+            case MISSING_DEADLINE_MARKER:
+                System.out.println("Deadline must include a /by date.");
+                break;
+            case MULTIPLE_DEADLINE_MARKERS:
+                System.out.println("Deadline may contain only one /by marker.");
+                break;
+            case MISSING_DEADLINE_DESCRIPTION:
+                System.out.println("Missing deadline description. Please try again.");
+                break;
+            case MISSING_DEADLINE_DATE:
+                System.out.println("Missing deadline date. Please try again.");
+                break;
+            case MISSING_EVENT_FROM_MARKER:
+                System.out.println("Event must include a /from time.");
+                break;
+            case MISSING_EVENT_TO_MARKER:
+                System.out.println("Event must include a /to time.");
+                break;
+            case REVERSED_EVENT_MARKERS:
+                System.out.println("The /to marker must come after /from.");
+                break;
+            case MULTIPLE_EVENT_MARKERS:
+                System.out.println("Event may only contain one /from and one /to marker.");
+                break;
+            case MISSING_EVENT_DESCRIPTION:
+                System.out.println("Missing event description. Please try again.");
+                break;
+            case MISSING_EVENT_START:
+                System.out.println("Missing event start time. Please try again.");
+                break;
+            case MISSING_EVENT_END:
+                System.out.println("Missing event end time. Please try again.");
+                break;
+            case SUCCESS:
+                throw new IllegalArgumentException("Cannot display a successful task parse as an error.");
+        }
     }
 
     /**
@@ -134,6 +178,16 @@ public final class Ui implements AutoCloseable {
     public void showTaskAddedMessage(Task task, int taskCount, int maximumTaskCount) {
         System.out.println("Ok, I've added to the task list:\n> " + task);
         System.out.println("Current list size: " + taskCount + "/" + maximumTaskCount);
+    }
+
+    /**
+     * Shows a message explaining that no more tasks can be added.
+     *
+     * @param taskCount number of tasks in the list.
+     * @param maximumTaskCount maximum number of tasks allowed in the list.
+     */
+    public void showTaskListFullMessage(int taskCount, int maximumTaskCount) {
+        System.out.println("The list is full (" + taskCount + "/" + maximumTaskCount + ").");
     }
 
     /**

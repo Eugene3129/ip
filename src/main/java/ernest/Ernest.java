@@ -125,15 +125,7 @@ public final class Ernest {
                 case COMMAND_DEADLINE:
                     // Fallthrough
                 case COMMAND_EVENT:
-                    if (command.parts().length == 1) {
-                        ui.showMissingTaskDescriptionMessage();
-                    } else {
-                        Task addedTask = taskList.addTask(command.text());
-                        if (addedTask != null) {
-                            ui.showTaskAddedMessage(addedTask, taskList.getTaskCount(),
-                                    taskList.getMaximumTaskCount());
-                        }
-                    }
+                    handleAddTaskCommand(command);
                     break;
                 default:
                     ui.showInvalidCommandMessage();
@@ -142,6 +134,39 @@ public final class Ernest {
         }
 
         ui.showHorizontalLine();
+    }
+
+    /**
+     * Handles a command that creates and adds a task.
+     *
+     * @param command parsed task command.
+     */
+    private void handleAddTaskCommand(Parser.ParsedCommand command) {
+        Parser.TaskParseResult parseResult = Parser.parseTask(command);
+        if (parseResult.status() == Parser.TaskParseStatus.SUCCESS) {
+            addTask(parseResult.task().orElseThrow());
+        } else {
+            ui.showTaskParsingErrorMessage(parseResult.status());
+        }
+    }
+
+    /**
+     * Adds a parsed task and shows the corresponding result.
+     *
+     * @param task parsed task to add.
+     */
+    private void addTask(Task task) {
+        TaskList.AddStatus status = taskList.addTask(task);
+        switch (status) {
+            case SUCCESS:
+                ui.showTaskAddedMessage(task, taskList.getTaskCount(),
+                        taskList.getMaximumTaskCount());
+                break;
+            case FULL:
+                ui.showTaskListFullMessage(taskList.getTaskCount(),
+                        taskList.getMaximumTaskCount());
+                break;
+        }
     }
 
     /**
