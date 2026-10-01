@@ -1,4 +1,4 @@
-package ernest;
+package ernest.task;
 
 /**
  * Represents a simple task without a date or time range.

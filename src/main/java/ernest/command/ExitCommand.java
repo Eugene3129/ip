@@ -1,4 +1,8 @@
-package ernest;
+package ernest.command;
+
+import ernest.storage.Storage;
+import ernest.task.TaskList;
+import ernest.ui.Ui;
 
 /**
  * Ends the current Ernest session.

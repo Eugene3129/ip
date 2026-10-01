@@ -1,4 +1,6 @@
-package ernest;
+package ernest.ui;
+
+import ernest.task.Task;
 
 import java.util.List;
 import java.util.Scanner;
@@ -76,68 +78,12 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
-     * Shows the reason a task command could not be parsed.
+     * Shows an expected error to the user.
      *
-     * @param status task parsing failure status.
+     * @param message explanation of the error.
      */
-    public void showTaskParsingErrorMessage(Parser.TaskParseStatus status) {
-        switch (status) {
-            case INVALID_TASK_COMMAND:
-                System.out.println("Sorry, please insert a valid task.");
-                break;
-            case MISSING_TASK_DESCRIPTION:
-                System.out.println("Missing task description. Please try again.");
-                break;
-            case MISSING_DEADLINE_MARKER:
-                System.out.println("Deadline must include a /by date.");
-                break;
-            case MULTIPLE_DEADLINE_MARKERS:
-                System.out.println("Deadline may contain only one /by marker.");
-                break;
-            case MISSING_DEADLINE_DESCRIPTION:
-                System.out.println("Missing deadline description. Please try again.");
-                break;
-            case MISSING_DEADLINE_DATE:
-                System.out.println("Missing deadline date. Please try again.");
-                break;
-            case MISSING_EVENT_FROM_MARKER:
-                System.out.println("Event must include a /from time.");
-                break;
-            case MISSING_EVENT_TO_MARKER:
-                System.out.println("Event must include a /to time.");
-                break;
-            case REVERSED_EVENT_MARKERS:
-                System.out.println("The /to marker must come after /from.");
-                break;
-            case MULTIPLE_EVENT_MARKERS:
-                System.out.println("Event may only contain one /from and one /to marker.");
-                break;
-            case MISSING_EVENT_DESCRIPTION:
-                System.out.println("Missing event description. Please try again.");
-                break;
-            case MISSING_EVENT_START:
-                System.out.println("Missing event start time. Please try again.");
-                break;
-            case MISSING_EVENT_END:
-                System.out.println("Missing event end time. Please try again.");
-                break;
-            case SUCCESS:
-                throw new IllegalArgumentException("Cannot display a successful task parse as an error.");
-        }
-    }
-
-    /**
-     * Shows a message explaining that a task number is required.
-     */
-    public void showMissingTaskNumberMessage() {
-        System.out.println("Missing task number. Please refer to the task list and try again.");
-    }
-
-    /**
-     * Shows a message explaining that a task number must be an integer.
-     */
-    public void showNonIntegerTaskNumberMessage() {
-        System.out.println("Task number must be an integer.");
+    public void showErrorMessage(String message) {
+        System.out.println(message);
     }
 
     /**
@@ -176,24 +122,24 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
-     * Shows a warning when saved tasks could not be loaded completely.
-     *
-     * @param status outcome of loading tasks from storage.
+     * Shows a warning that the saved-data header is invalid.
      */
-    public void showTaskLoadingStatus(Storage.LoadStatus status) {
-        switch (status) {
-            case SUCCESS:
-                break;
-            case INVALID_HEADER:
-                System.out.println("Warning: Saved tasks could not be loaded because the file header is invalid.");
-                break;
-            case PARTIAL_LOAD:
-                System.out.println("Warning: Some saved tasks could not be loaded.");
-                break;
-            case LOAD_FAILURE:
-                System.out.println("Warning: Saved tasks could not be loaded.");
-                break;
-        }
+    public void showInvalidStorageHeaderWarning() {
+        System.out.println("Warning: Saved tasks could not be loaded because the file header is invalid.");
+    }
+
+    /**
+     * Shows a warning that some saved tasks could not be loaded.
+     */
+    public void showPartialTaskLoadWarning() {
+        System.out.println("Warning: Some saved tasks could not be loaded.");
+    }
+
+    /**
+     * Shows a warning that saved tasks could not be loaded.
+     */
+    public void showTaskLoadFailureWarning() {
+        System.out.println("Warning: Saved tasks could not be loaded.");
     }
 
     /**

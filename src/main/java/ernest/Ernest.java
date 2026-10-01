@@ -1,5 +1,12 @@
 package ernest;
 
+import ernest.command.Command;
+import ernest.exception.ErnestException;
+import ernest.parser.Parser;
+import ernest.storage.Storage;
+import ernest.task.TaskList;
+import ernest.ui.Ui;
+
 /**
  * Runs Ernest, a simple command-line task manager.
  */
@@ -25,7 +32,7 @@ public final class Ernest {
         this.storage = new Storage(filePath);
         Storage.LoadResult loadResult = storage.loadTasks(TaskList.getMaximumTaskCapacity());
         this.taskList = new TaskList(loadResult.tasks());
-        this.ui.showTaskLoadingStatus(loadResult.status());
+        showTaskLoadingStatus(loadResult.status());
     }
 
     /**
@@ -54,12 +61,37 @@ public final class Ernest {
      */
     private void runChat() {
         while (ui.hasNextCommand()) {
-            Command command = Parser.parse(ui.readCommand());
-            command.execute(taskList, ui, storage);
-            if (command.isExit()) {
-                return;
+            try {
+                Command command = Parser.parse(ui.readCommand());
+                command.execute(taskList, ui, storage);
+                if (command.isExit()) {
+                    return;
+                }
+            } catch (ErnestException exception) {
+                ui.showErrorMessage(exception.getMessage());
             }
             ui.showHorizontalLine();
+        }
+    }
+
+    /**
+     * Shows any warning associated with loading tasks from storage.
+     *
+     * @param status outcome of loading tasks from storage.
+     */
+    private void showTaskLoadingStatus(Storage.LoadStatus status) {
+        switch (status) {
+            case SUCCESS:
+                break;
+            case INVALID_HEADER:
+                ui.showInvalidStorageHeaderWarning();
+                break;
+            case PARTIAL_LOAD:
+                ui.showPartialTaskLoadWarning();
+                break;
+            case LOAD_FAILURE:
+                ui.showTaskLoadFailureWarning();
+                break;
         }
     }
 }

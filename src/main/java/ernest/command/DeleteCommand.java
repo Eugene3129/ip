@@ -1,4 +1,9 @@
-package ernest;
+package ernest.command;
+
+import ernest.storage.Storage;
+import ernest.task.Task;
+import ernest.task.TaskList;
+import ernest.ui.Ui;
 
 import java.util.Optional;
 

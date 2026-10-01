@@ -1,4 +1,8 @@
-package ernest;
+package ernest.command;
+
+import ernest.storage.Storage;
+import ernest.task.TaskList;
+import ernest.ui.Ui;
 
 /**
  * Marks a numbered task as done.

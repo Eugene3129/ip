@@ -1,4 +1,4 @@
-package ernest;
+package ernest.task;
 
 /**
  * Represents a task that occurs within a time range.

@@ -1,4 +1,9 @@
-package ernest;
+package ernest.storage;
+
+import ernest.task.Deadline;
+import ernest.task.Event;
+import ernest.task.Task;
+import ernest.task.ToDo;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,7 +1,22 @@
-package ernest;
+package ernest.parser;
+
+import ernest.command.AddCommand;
+import ernest.command.ClearCommand;
+import ernest.command.Command;
+import ernest.command.DeleteCommand;
+import ernest.command.ExitCommand;
+import ernest.command.HelpCommand;
+import ernest.command.InvalidCommand;
+import ernest.command.ListCommand;
+import ernest.command.MarkCommand;
+import ernest.command.UnmarkCommand;
+import ernest.exception.ErnestException;
+import ernest.task.Deadline;
+import ernest.task.Event;
+import ernest.task.Task;
+import ernest.task.ToDo;
 
 import java.util.Locale;
-import java.util.Optional;
 
 /**
  * Converts raw user input into commands that Ernest can execute.
@@ -23,6 +38,24 @@ public final class Parser {
     private static final String DEADLINE_MARKER = "/by";
     private static final String EVENT_FROM_MARKER = "/from";
     private static final String EVENT_TO_MARKER = "/to";
+    private static final String ERROR_INVALID_TASK = "Sorry, please insert a valid task.";
+    private static final String ERROR_MISSING_TASK_DESCRIPTION = "Missing task description. Please try again.";
+    private static final String ERROR_MISSING_DEADLINE_MARKER = "Deadline must include a /by date.";
+    private static final String ERROR_MULTIPLE_DEADLINE_MARKERS = "Deadline may contain only one /by marker.";
+    private static final String ERROR_MISSING_DEADLINE_DESCRIPTION =
+            "Missing deadline description. Please try again.";
+    private static final String ERROR_MISSING_DEADLINE_DATE = "Missing deadline date. Please try again.";
+    private static final String ERROR_MISSING_EVENT_FROM_MARKER = "Event must include a /from time.";
+    private static final String ERROR_MISSING_EVENT_TO_MARKER = "Event must include a /to time.";
+    private static final String ERROR_REVERSED_EVENT_MARKERS = "The /to marker must come after /from.";
+    private static final String ERROR_MULTIPLE_EVENT_MARKERS =
+            "Event may only contain one /from and one /to marker.";
+    private static final String ERROR_MISSING_EVENT_DESCRIPTION = "Missing event description. Please try again.";
+    private static final String ERROR_MISSING_EVENT_START = "Missing event start time. Please try again.";
+    private static final String ERROR_MISSING_EVENT_END = "Missing event end time. Please try again.";
+    private static final String ERROR_MISSING_TASK_NUMBER =
+            "Missing task number. Please refer to the task list and try again.";
+    private static final String ERROR_NON_INTEGER_TASK_NUMBER = "Task number must be an integer.";
 
     private Parser() {
         // Prevent instantiation of this utility class.
@@ -33,8 +66,9 @@ public final class Parser {
      *
      * @param commandLine command entered by the user.
      * @return command represented by the input.
+     * @throws ErnestException if a recognized command contains invalid arguments.
      */
-    public static Command parse(String commandLine) {
+    public static Command parse(String commandLine) throws ErnestException {
         ParsedCommand command = parseInput(commandLine);
         if (command.parts().length == 0) {
             return new InvalidCommand();
@@ -82,32 +116,25 @@ public final class Parser {
     }
 
     /**
-     * Returns an add command or a task parsing error command.
+     * Returns an add command containing the parsed task.
      *
      * @param command parsed task-creation command.
      * @return executable command represented by the input.
+     * @throws ErnestException if the task details are invalid.
      */
-    private static Command parseAddCommand(ParsedCommand command) {
-        TaskParseResult result = parseTask(command);
-        if (result.status() == TaskParseStatus.SUCCESS) {
-            return new AddCommand(result.task().orElseThrow());
-        }
-        return new TaskParsingErrorCommand(result.status());
+    private static Command parseAddCommand(ParsedCommand command) throws ErnestException {
+        return new AddCommand(parseTask(command));
     }
 
     /**
-     * Returns a numbered task command or a task number error command.
+     * Returns a numbered task command containing the parsed task number.
      *
      * @param command parsed command containing a task number.
      * @return executable command represented by the input.
+     * @throws ErnestException if the task number is missing or nonnumeric.
      */
-    private static Command parseNumberedCommand(ParsedCommand command) {
-        TaskNumberParseResult result = parseTaskNumber(command);
-        if (result.status() != TaskNumberStatus.VALID) {
-            return new TaskNumberErrorCommand(result.status());
-        }
-
-        int taskNumber = result.taskNumber();
+    private static Command parseNumberedCommand(ParsedCommand command) throws ErnestException {
+        int taskNumber = parseTaskNumber(command);
         switch (command.parts()[0]) {
             case COMMAND_DELETE:
                 return new DeleteCommand(taskNumber);
@@ -124,11 +151,12 @@ public final class Parser {
      * Parses and constructs the task represented by a task command.
      *
      * @param command parsed task command.
-     * @return task parsing result containing either a task or a failure status.
+     * @return task represented by the command.
+     * @throws ErnestException if the task details are invalid.
      */
-    public static TaskParseResult parseTask(ParsedCommand command) {
+    private static Task parseTask(ParsedCommand command) throws ErnestException {
         if (command.parts().length < 2) {
-            return failedTaskParse(TaskParseStatus.MISSING_TASK_DESCRIPTION);
+            throw new ErnestException(ERROR_MISSING_TASK_DESCRIPTION);
         }
 
         String taskCommand = command.text().strip().replaceFirst("\\s+", " ");
@@ -141,7 +169,7 @@ public final class Parser {
         } else if (normalizedCommand.startsWith(EVENT_PREFIX)) {
             return parseEvent(taskCommand, normalizedCommand);
         } else {
-            return failedTaskParse(TaskParseStatus.INVALID_TASK_COMMAND);
+            throw new ErnestException(ERROR_INVALID_TASK);
         }
     }
 
@@ -149,18 +177,18 @@ public final class Parser {
      * Parses the task number argument of a numbered task command.
      *
      * @param command parsed command containing the task number argument.
-     * @return task number parsing result.
+     * @return parsed task number.
+     * @throws ErnestException if the task number is missing or nonnumeric.
      */
-    public static TaskNumberParseResult parseTaskNumber(ParsedCommand command) {
+    private static int parseTaskNumber(ParsedCommand command) throws ErnestException {
         if (command.parts().length < 2 || command.parts()[1].isEmpty()) {
-            return new TaskNumberParseResult(TaskNumberStatus.MISSING, 0);
+            throw new ErnestException(ERROR_MISSING_TASK_NUMBER);
         }
 
         try {
-            int taskNumber = Integer.parseInt(command.parts()[1]);
-            return new TaskNumberParseResult(TaskNumberStatus.VALID, taskNumber);
+            return Integer.parseInt(command.parts()[1]);
         } catch (NumberFormatException exception) {
-            return new TaskNumberParseResult(TaskNumberStatus.NOT_INTEGER, 0);
+            throw new ErnestException(ERROR_NON_INTEGER_TASK_NUMBER);
         }
     }
 
@@ -168,14 +196,15 @@ public final class Parser {
      * Parses a to-do task command.
      *
      * @param taskCommand command containing the task description.
-     * @return task parsing result.
+     * @return task represented by the command.
+     * @throws ErnestException if the task description is missing.
      */
-    private static TaskParseResult parseToDo(String taskCommand) {
+    private static Task parseToDo(String taskCommand) throws ErnestException {
         String taskName = taskCommand.substring(TODO_PREFIX.length()).strip();
         if (taskName.isEmpty()) {
-            return failedTaskParse(TaskParseStatus.MISSING_TASK_DESCRIPTION);
+            throw new ErnestException(ERROR_MISSING_TASK_DESCRIPTION);
         }
-        return successfulTaskParse(new ToDo(taskName));
+        return new ToDo(taskName);
     }
 
     /**
@@ -183,27 +212,28 @@ public final class Parser {
      *
      * @param taskCommand command containing the original-casing task details.
      * @param normalizedCommand normalized command used to find markers.
-     * @return task parsing result.
+     * @return task represented by the command.
+     * @throws ErnestException if the deadline details are invalid.
      */
-    private static TaskParseResult parseDeadline(String taskCommand, String normalizedCommand) {
+    private static Task parseDeadline(String taskCommand, String normalizedCommand) throws ErnestException {
         int deadlineMarker = findMarker(normalizedCommand, DEADLINE_MARKER);
         if (deadlineMarker < 0) {
-            return failedTaskParse(TaskParseStatus.MISSING_DEADLINE_MARKER);
+            throw new ErnestException(ERROR_MISSING_DEADLINE_MARKER);
         }
         if (findMarker(normalizedCommand, DEADLINE_MARKER,
                 deadlineMarker + DEADLINE_MARKER.length()) >= 0) {
-            return failedTaskParse(TaskParseStatus.MULTIPLE_DEADLINE_MARKERS);
+            throw new ErnestException(ERROR_MULTIPLE_DEADLINE_MARKERS);
         }
 
         String taskName = taskCommand.substring(DEADLINE_PREFIX.length(), deadlineMarker).strip();
         String deadline = taskCommand.substring(deadlineMarker + DEADLINE_MARKER.length()).strip();
         if (taskName.isEmpty()) {
-            return failedTaskParse(TaskParseStatus.MISSING_DEADLINE_DESCRIPTION);
+            throw new ErnestException(ERROR_MISSING_DEADLINE_DESCRIPTION);
         }
         if (deadline.isEmpty()) {
-            return failedTaskParse(TaskParseStatus.MISSING_DEADLINE_DATE);
+            throw new ErnestException(ERROR_MISSING_DEADLINE_DATE);
         }
-        return successfulTaskParse(new Deadline(taskName, deadline));
+        return new Deadline(taskName, deadline);
     }
 
     /**
@@ -211,25 +241,26 @@ public final class Parser {
      *
      * @param taskCommand command containing the original-casing task details.
      * @param normalizedCommand normalized command used to find markers.
-     * @return task parsing result.
+     * @return task represented by the command.
+     * @throws ErnestException if the event details are invalid.
      */
-    private static TaskParseResult parseEvent(String taskCommand, String normalizedCommand) {
+    private static Task parseEvent(String taskCommand, String normalizedCommand) throws ErnestException {
         int fromMarker = findMarker(normalizedCommand, EVENT_FROM_MARKER);
         int toMarker = findMarker(normalizedCommand, EVENT_TO_MARKER);
         if (fromMarker < 0) {
-            return failedTaskParse(TaskParseStatus.MISSING_EVENT_FROM_MARKER);
+            throw new ErnestException(ERROR_MISSING_EVENT_FROM_MARKER);
         }
         if (toMarker < 0) {
-            return failedTaskParse(TaskParseStatus.MISSING_EVENT_TO_MARKER);
+            throw new ErnestException(ERROR_MISSING_EVENT_TO_MARKER);
         }
         if (toMarker <= fromMarker) {
-            return failedTaskParse(TaskParseStatus.REVERSED_EVENT_MARKERS);
+            throw new ErnestException(ERROR_REVERSED_EVENT_MARKERS);
         }
         if (findMarker(normalizedCommand, EVENT_FROM_MARKER,
                 fromMarker + EVENT_FROM_MARKER.length()) >= 0
                 || findMarker(normalizedCommand, EVENT_TO_MARKER,
                 toMarker + EVENT_TO_MARKER.length()) >= 0) {
-            return failedTaskParse(TaskParseStatus.MULTIPLE_EVENT_MARKERS);
+            throw new ErnestException(ERROR_MULTIPLE_EVENT_MARKERS);
         }
 
         String taskName = taskCommand.substring(EVENT_PREFIX.length(), fromMarker).strip();
@@ -237,35 +268,15 @@ public final class Parser {
                 .strip();
         String durationEnd = taskCommand.substring(toMarker + EVENT_TO_MARKER.length()).strip();
         if (taskName.isEmpty()) {
-            return failedTaskParse(TaskParseStatus.MISSING_EVENT_DESCRIPTION);
+            throw new ErnestException(ERROR_MISSING_EVENT_DESCRIPTION);
         }
         if (durationStart.isEmpty()) {
-            return failedTaskParse(TaskParseStatus.MISSING_EVENT_START);
+            throw new ErnestException(ERROR_MISSING_EVENT_START);
         }
         if (durationEnd.isEmpty()) {
-            return failedTaskParse(TaskParseStatus.MISSING_EVENT_END);
+            throw new ErnestException(ERROR_MISSING_EVENT_END);
         }
-        return successfulTaskParse(new Event(taskName, durationStart, durationEnd));
-    }
-
-    /**
-     * Returns a successful task parsing result.
-     *
-     * @param task parsed task.
-     * @return successful parsing result.
-     */
-    private static TaskParseResult successfulTaskParse(Task task) {
-        return new TaskParseResult(TaskParseStatus.SUCCESS, Optional.of(task));
-    }
-
-    /**
-     * Returns a failed task parsing result.
-     *
-     * @param status reason the task command could not be parsed.
-     * @return failed parsing result.
-     */
-    private static TaskParseResult failedTaskParse(TaskParseStatus status) {
-        return new TaskParseResult(status, Optional.empty());
+        return new Event(taskName, durationStart, durationEnd);
     }
 
     /**
@@ -309,53 +320,6 @@ public final class Parser {
      * @param text trimmed command text with its original casing.
      * @param parts normalized command parts.
      */
-    public record ParsedCommand(String text, String[] parts) {
-    }
-
-    /**
-     * Describes the outcome of parsing a task command.
-     */
-    public enum TaskParseStatus {
-        SUCCESS,
-        INVALID_TASK_COMMAND,
-        MISSING_TASK_DESCRIPTION,
-        MISSING_DEADLINE_MARKER,
-        MULTIPLE_DEADLINE_MARKERS,
-        MISSING_DEADLINE_DESCRIPTION,
-        MISSING_DEADLINE_DATE,
-        MISSING_EVENT_FROM_MARKER,
-        MISSING_EVENT_TO_MARKER,
-        REVERSED_EVENT_MARKERS,
-        MULTIPLE_EVENT_MARKERS,
-        MISSING_EVENT_DESCRIPTION,
-        MISSING_EVENT_START,
-        MISSING_EVENT_END
-    }
-
-    /**
-     * Stores the result of parsing a task command.
-     *
-     * @param status outcome of parsing the command.
-     * @param task parsed task, or an empty result when parsing failed.
-     */
-    public record TaskParseResult(TaskParseStatus status, Optional<Task> task) {
-    }
-
-    /**
-     * Describes whether a task number argument is valid, missing, or nonnumeric.
-     */
-    public enum TaskNumberStatus {
-        VALID,
-        MISSING,
-        NOT_INTEGER
-    }
-
-    /**
-     * Stores the result of parsing a task number argument.
-     *
-     * @param status outcome of parsing the argument.
-     * @param taskNumber parsed task number, or zero when no number is available.
-     */
-    public record TaskNumberParseResult(TaskNumberStatus status, int taskNumber) {
+    private record ParsedCommand(String text, String[] parts) {
     }
 }

@@ -1,4 +1,4 @@
-package ernest;
+package ernest.task;
 
 /**
  * Represents a task in Ernest's to-do list.
