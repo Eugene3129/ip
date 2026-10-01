@@ -1,7 +1,5 @@
 package ernest;
 
-import java.util.Optional;
-
 /**
  * Runs Ernest, a simple command-line task manager.
  */
@@ -164,29 +162,9 @@ public final class Ernest {
     private void handleAddTaskCommand(Parser.ParsedCommand command) {
         Parser.TaskParseResult parseResult = Parser.parseTask(command);
         if (parseResult.status() == Parser.TaskParseStatus.SUCCESS) {
-            addTask(parseResult.task().orElseThrow());
+            executeCommand(new AddCommand(parseResult.task().orElseThrow()));
         } else {
             ui.showTaskParsingErrorMessage(parseResult.status());
-        }
-    }
-
-    /**
-     * Adds a parsed task and shows the corresponding result.
-     *
-     * @param task parsed task to add.
-     */
-    private void addTask(Task task) {
-        TaskList.AddStatus status = taskList.addTask(task);
-        switch (status) {
-            case SUCCESS:
-                saveTasks();
-                ui.showTaskAddedMessage(task, taskList.getTaskCount(),
-                        taskList.getMaximumTaskCount());
-                break;
-            case FULL:
-                ui.showTaskListFullMessage(taskList.getTaskCount(),
-                        taskList.getMaximumTaskCount());
-                break;
         }
     }
 
@@ -220,83 +198,17 @@ public final class Ernest {
     private void executeNumberedTaskCommand(String commandWord, int taskNumber) {
         switch (commandWord) {
             case COMMAND_DELETE:
-                deleteTask(taskNumber);
+                executeCommand(new DeleteCommand(taskNumber));
                 break;
             case COMMAND_MARK:
-                markTask(taskNumber);
+                executeCommand(new MarkCommand(taskNumber));
                 break;
             case COMMAND_UNMARK:
-                unmarkTask(taskNumber);
+                executeCommand(new UnmarkCommand(taskNumber));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported numbered command: " + commandWord);
         }
     }
 
-    /**
-     * Deletes a task and shows the corresponding result.
-     *
-     * @param taskNumber one-based number of the task to delete.
-     */
-    private void deleteTask(int taskNumber) {
-        Optional<Task> deletedTask = taskList.deleteTask(taskNumber);
-        if (deletedTask.isPresent()) {
-            saveTasks();
-            ui.showTaskDeletedMessage(deletedTask.get(), taskList.getTaskCount(),
-                    taskList.getMaximumTaskCount());
-        } else {
-            ui.showInvalidTaskNumberMessage();
-        }
-    }
-
-    /**
-     * Marks a task and shows the corresponding result.
-     *
-     * @param taskNumber one-based number of the task to mark.
-     */
-    private void markTask(int taskNumber) {
-        TaskList.MarkStatus status = taskList.markTask(taskNumber);
-        switch (status) {
-            case SUCCESS:
-                saveTasks();
-                ui.showTaskMarkedMessage(taskNumber);
-                break;
-            case INVALID_TASK_NUMBER:
-                ui.showInvalidTaskNumberMessage();
-                break;
-            case ALREADY_DONE:
-                ui.showTaskAlreadyDoneMessage(taskNumber);
-                break;
-        }
-    }
-
-    /**
-     * Unmarks a task and shows the corresponding result.
-     *
-     * @param taskNumber one-based number of the task to unmark.
-     */
-    private void unmarkTask(int taskNumber) {
-        TaskList.UnmarkStatus status = taskList.unmarkTask(taskNumber);
-        switch (status) {
-            case SUCCESS:
-                saveTasks();
-                ui.showTaskUnmarkedMessage(taskNumber);
-                break;
-            case INVALID_TASK_NUMBER:
-                ui.showInvalidTaskNumberMessage();
-                break;
-            case ALREADY_NOT_DONE:
-                ui.showTaskAlreadyNotDoneMessage(taskNumber);
-                break;
-        }
-    }
-
-    /**
-     * Saves the current task list and shows a warning if saving fails.
-     */
-    private void saveTasks() {
-        if (!storage.saveTasks(taskList.getTasks())) {
-            ui.showSaveErrorMessage();
-        }
-    }
 }

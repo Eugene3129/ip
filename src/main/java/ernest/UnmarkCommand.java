@@ -1,0 +1,35 @@
+package ernest;
+
+/**
+ * Marks a numbered task as not done.
+ */
+public final class UnmarkCommand extends Command {
+    /** One-based number of the task to unmark. */
+    private final int taskNumber;
+
+    /**
+     * Creates a command that unmarks a specified task number.
+     *
+     * @param taskNumber one-based number of the task to unmark.
+     */
+    public UnmarkCommand(int taskNumber) {
+        this.taskNumber = taskNumber;
+    }
+
+    @Override
+    public void execute(TaskList taskList, Ui ui, Storage storage) {
+        TaskList.UnmarkStatus status = taskList.unmarkTask(taskNumber);
+        switch (status) {
+            case SUCCESS:
+                saveTasks(taskList, ui, storage);
+                ui.showTaskUnmarkedMessage(taskNumber);
+                break;
+            case INVALID_TASK_NUMBER:
+                ui.showInvalidTaskNumberMessage();
+                break;
+            case ALREADY_NOT_DONE:
+                ui.showTaskAlreadyNotDoneMessage(taskNumber);
+                break;
+        }
+    }
+}
