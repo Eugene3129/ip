@@ -70,11 +70,11 @@ public final class Storage {
                 if (records.get(i).isBlank()) {
                     continue;
                 }
+                if (tasks.size() == maximumTasks) {
+                    hasInvalidRecord = true;
+                    break;
+                }
                 try {
-                    if (tasks.size() == maximumTasks) {
-                        hasInvalidRecord = true;
-                        break;
-                    }
                     tasks.add(toTask(parseCsvRecord(records.get(i))));
                 } catch (IllegalArgumentException exception) {
                     hasInvalidRecord = true;
@@ -142,24 +142,24 @@ public final class Storage {
         }
 
         boolean isDone = switch (fields.get(1)) {
-        case "true" -> true;
-        case "false" -> false;
-        default -> throw new IllegalArgumentException("Task record has an invalid completion status.");
+            case "true" -> true;
+            case "false" -> false;
+            default -> throw new IllegalArgumentException("Task record has an invalid completion status.");
         };
 
         Task task;
         switch (fields.get(0)) {
-        case "todo":
-            task = new ToDo(fields.get(2));
-            break;
-        case "deadline":
-            task = new Deadline(fields.get(2), fields.get(3));
-            break;
-        case "event":
-            task = new Event(fields.get(2), fields.get(4), fields.get(5));
-            break;
-        default:
-            throw new IllegalArgumentException("Task record has an unknown type.");
+            case "todo":
+                task = new ToDo(fields.get(2));
+                break;
+            case "deadline":
+                task = new Deadline(fields.get(2), fields.get(3));
+                break;
+            case "event":
+                task = new Event(fields.get(2), fields.get(4), fields.get(5));
+                break;
+            default:
+                throw new IllegalArgumentException("Task record has an unknown type.");
         }
         task.setDone(isDone);
         return task;
