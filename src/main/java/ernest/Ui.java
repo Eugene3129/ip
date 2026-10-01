@@ -1,5 +1,6 @@
 package ernest;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -79,6 +80,20 @@ public final class Ui implements AutoCloseable {
      */
     public void showMissingTaskDescriptionMessage() {
         System.out.println("Missing task description. Please try again.");
+    }
+
+    /**
+     * Shows all tasks and their completion status.
+     *
+     * @param tasks tasks to display in list order.
+     */
+    public void showTaskList(List<Task> tasks) {
+        System.out.println("Your to-do list is:");
+
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            System.out.println((i + 1) + ". " + task);
+        }
     }
 
     /**

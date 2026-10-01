@@ -32,15 +32,12 @@ public final class TaskList {
     }
 
     /**
-     * Prints all tasks and their completion status.
+     * Returns an unmodifiable snapshot of the stored tasks.
+     *
+     * @return tasks in their current list order.
      */
-    public void listTasks() {
-        System.out.println("Your to-do list is:");
-
-        for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            System.out.println((i + 1) + ". " + task);
-        }
+    public List<Task> getTasks() {
+        return List.copyOf(tasks);
     }
 
     /**

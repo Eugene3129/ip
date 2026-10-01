@@ -91,7 +91,7 @@ public final class Ernest {
                     break;
                 case COMMAND_LIST:
                     if (command.parts().length == 1) {
-                        taskList.listTasks();
+                        ui.showTaskList(taskList.getTasks());
                     } else {
                         ui.showInvalidCommandMessage();
                     }
