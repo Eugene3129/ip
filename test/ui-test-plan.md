@@ -20,6 +20,8 @@ This plan exercises the stdin/console interface of
   runner compares it with `data/ernest.txt` after that case completes.
 - A test case may include `Data directory is a file:` to create a file named
   `data`, which simulates a storage-directory creation failure.
+- A test case may include `Data file is a directory:` to create a directory at
+  `data/ernest.txt`, which simulates a storage-file read failure.
 - Output is compared exactly after CRLF/CR line endings are normalized to LF.
   Extra output, missing output, ordering changes, and whitespace changes fail
   the case.
@@ -1115,6 +1117,307 @@ Current list size: 0/100
 ______________________________________
 Warning: Task changes could not be saved.
 Task list cleared.
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Reject empty and overlong fixed commands
+
+Aim: Verify that empty input and fixed commands with extra arguments are rejected without exiting or changing state.
+
+Inputs:
+```text
+
+bye now
+list now
+clear now
+help now
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Sorry, please insert a valid command.
+______________________________________
+Sorry, please insert a valid command.
+______________________________________
+Sorry, please insert a valid command.
+______________________________________
+Sorry, please insert a valid command.
+______________________________________
+Sorry, please insert a valid command.
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Reject incomplete and duplicate task markers
+
+Aim: Verify that missing or repeated deadline and event markers produce specific errors without adding tasks.
+
+Inputs:
+```text
+deadline submit report /by Friday /by Saturday
+event team meeting /from 10am
+event team meeting /from 10am /from 10:30am /to 11am
+event team meeting /from 10am /to 11am /to noon
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Deadline may contain only one /by marker.
+______________________________________
+Event must include a /to time.
+______________________________________
+Event may only contain one /from and one /to marker.
+______________________________________
+Event may only contain one /from and one /to marker.
+______________________________________
+Your to-do list is:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Preserve quoted CSV task details
+
+Aim: Verify that storage loads and saves commas and quotation marks in task fields without corrupting them.
+
+Initial data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"todo","false","buy milk, eggs and ""bread""","","",""
+"deadline","true","submit ""final"", report","Friday, 5pm","",""
+"event","false","team ""sync"", weekly","","10am, sharp","11am"
+```
+
+Inputs:
+```text
+mark 1
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Well done! Marked task 1 as done.
+______________________________________
+Your to-do list is:
+1. [T][X] buy milk, eggs and "bread"
+2. [D][X] submit "final", report (by: Friday, 5pm)
+3. [E][ ] team "sync", weekly (from: 10am, sharp to: 11am)
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+Expected saved data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"todo","true","buy milk, eggs and ""bread""","","",""
+"deadline","true","submit ""final"", report","Friday, 5pm","",""
+"event","false","team ""sync"", weekly","","10am, sharp","11am"
+```
+
+## Test case: Warn when loading fails
+
+Aim: Verify that Ernest warns the user and starts with an empty task list when the storage file cannot be read.
+
+Data file is a directory:
+
+Inputs:
+```text
+list
+bye
+```
+
+Expected output:
+```text
+Warning: Saved tasks could not be loaded.
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Your to-do list is:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Reject tasks beyond storage capacity
+
+Aim: Verify that oversized saved data is truncated with a warning and that no task can be added beyond capacity.
+
+Initial data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"todo","false","task 1","","",""
+"todo","false","task 2","","",""
+"todo","false","task 3","","",""
+"todo","false","task 4","","",""
+"todo","false","task 5","","",""
+"todo","false","task 6","","",""
+"todo","false","task 7","","",""
+"todo","false","task 8","","",""
+"todo","false","task 9","","",""
+"todo","false","task 10","","",""
+"todo","false","task 11","","",""
+"todo","false","task 12","","",""
+"todo","false","task 13","","",""
+"todo","false","task 14","","",""
+"todo","false","task 15","","",""
+"todo","false","task 16","","",""
+"todo","false","task 17","","",""
+"todo","false","task 18","","",""
+"todo","false","task 19","","",""
+"todo","false","task 20","","",""
+"todo","false","task 21","","",""
+"todo","false","task 22","","",""
+"todo","false","task 23","","",""
+"todo","false","task 24","","",""
+"todo","false","task 25","","",""
+"todo","false","task 26","","",""
+"todo","false","task 27","","",""
+"todo","false","task 28","","",""
+"todo","false","task 29","","",""
+"todo","false","task 30","","",""
+"todo","false","task 31","","",""
+"todo","false","task 32","","",""
+"todo","false","task 33","","",""
+"todo","false","task 34","","",""
+"todo","false","task 35","","",""
+"todo","false","task 36","","",""
+"todo","false","task 37","","",""
+"todo","false","task 38","","",""
+"todo","false","task 39","","",""
+"todo","false","task 40","","",""
+"todo","false","task 41","","",""
+"todo","false","task 42","","",""
+"todo","false","task 43","","",""
+"todo","false","task 44","","",""
+"todo","false","task 45","","",""
+"todo","false","task 46","","",""
+"todo","false","task 47","","",""
+"todo","false","task 48","","",""
+"todo","false","task 49","","",""
+"todo","false","task 50","","",""
+"todo","false","task 51","","",""
+"todo","false","task 52","","",""
+"todo","false","task 53","","",""
+"todo","false","task 54","","",""
+"todo","false","task 55","","",""
+"todo","false","task 56","","",""
+"todo","false","task 57","","",""
+"todo","false","task 58","","",""
+"todo","false","task 59","","",""
+"todo","false","task 60","","",""
+"todo","false","task 61","","",""
+"todo","false","task 62","","",""
+"todo","false","task 63","","",""
+"todo","false","task 64","","",""
+"todo","false","task 65","","",""
+"todo","false","task 66","","",""
+"todo","false","task 67","","",""
+"todo","false","task 68","","",""
+"todo","false","task 69","","",""
+"todo","false","task 70","","",""
+"todo","false","task 71","","",""
+"todo","false","task 72","","",""
+"todo","false","task 73","","",""
+"todo","false","task 74","","",""
+"todo","false","task 75","","",""
+"todo","false","task 76","","",""
+"todo","false","task 77","","",""
+"todo","false","task 78","","",""
+"todo","false","task 79","","",""
+"todo","false","task 80","","",""
+"todo","false","task 81","","",""
+"todo","false","task 82","","",""
+"todo","false","task 83","","",""
+"todo","false","task 84","","",""
+"todo","false","task 85","","",""
+"todo","false","task 86","","",""
+"todo","false","task 87","","",""
+"todo","false","task 88","","",""
+"todo","false","task 89","","",""
+"todo","false","task 90","","",""
+"todo","false","task 91","","",""
+"todo","false","task 92","","",""
+"todo","false","task 93","","",""
+"todo","false","task 94","","",""
+"todo","false","task 95","","",""
+"todo","false","task 96","","",""
+"todo","false","task 97","","",""
+"todo","false","task 98","","",""
+"todo","false","task 99","","",""
+"todo","false","task 100","","",""
+"todo","false","task 101","","",""
+```
+
+Inputs:
+```text
+todo overflow task
+bye
+```
+
+Expected output:
+```text
+Warning: Some saved tasks could not be loaded.
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+The list is full (100/100).
 ______________________________________
 Bye. See you again soon!
 ______________________________________
