@@ -27,8 +27,10 @@ public final class Ernest {
      * Creates an Ernest task manager with its task list and user interface.
      */
     public Ernest() {
-        this.taskList = new TaskList();
         this.ui = new Ui();
+        Storage.LoadResult loadResult = Storage.loadTasks(TaskList.getMaximumTaskCapacity());
+        this.taskList = new TaskList(loadResult.tasks());
+        this.ui.showTaskLoadingStatus(loadResult.status());
     }
 
     /**

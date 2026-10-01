@@ -176,6 +176,27 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows a warning when saved tasks could not be loaded completely.
+     *
+     * @param status outcome of loading tasks from storage.
+     */
+    public void showTaskLoadingStatus(Storage.LoadStatus status) {
+        switch (status) {
+            case SUCCESS:
+                break;
+            case INVALID_HEADER:
+                System.out.println("Warning: Saved tasks could not be loaded because the file header is invalid.");
+                break;
+            case PARTIAL_LOAD:
+                System.out.println("Warning: Some saved tasks could not be loaded.");
+                break;
+            case LOAD_FAILURE:
+                System.out.println("Warning: Saved tasks could not be loaded.");
+                break;
+        }
+    }
+
+    /**
      * Shows the task added to the list and the remaining capacity.
      *
      * @param task added task.

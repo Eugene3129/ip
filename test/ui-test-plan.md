@@ -134,6 +134,42 @@ Bye. See you again soon!
 ______________________________________
 ```
 
+## Test case: Reject an invalid saved-data header
+
+Aim: Verify that Ernest rejects a saved-data file with an invalid CSV header.
+
+Initial data:
+```csv
+invalid,header
+"todo","false","do not load this task","","",""
+```
+
+Inputs:
+```text
+list
+bye
+```
+
+Expected output:
+```text
+Warning: Saved tasks could not be loaded because the file header is invalid.
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Your to-do list is:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
 ## Test case: Accept case-insensitive task commands
 
 Aim: Verify that task types and task markers are case-insensitive while task descriptions preserve their entered casing.

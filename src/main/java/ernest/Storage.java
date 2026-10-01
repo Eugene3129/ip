@@ -46,23 +46,22 @@ public final class Storage {
      *
      * @return tasks read from the data file.
      */
-    public static ArrayList<Task> loadTasks(int maximumTasks) {
+    public static LoadResult loadTasks(int maximumTasks) {
         ArrayList<Task> tasks = new ArrayList<>();
         if (maximumTasks <= 0) {
-            return tasks;
+            return new LoadResult(tasks, LoadStatus.SUCCESS);
         }
 
         try {
             if (!Files.exists(DATA_FILE_PATH)) {
-                return tasks;
+                return new LoadResult(tasks, LoadStatus.SUCCESS);
             }
             List<String> records = Files.readAllLines(DATA_FILE_PATH);
             if (records.isEmpty()) {
-                return tasks;
+                return new LoadResult(tasks, LoadStatus.SUCCESS);
             }
             if (!CSV_HEADER.equals(records.get(0))) {
-                System.out.println("Warning: Saved tasks could not be loaded because the file header is invalid.");
-                return tasks;
+                return new LoadResult(tasks, LoadStatus.INVALID_HEADER);
             }
 
             boolean hasInvalidRecord = false;
@@ -80,13 +79,11 @@ public final class Storage {
                     hasInvalidRecord = true;
                 }
             }
-            if (hasInvalidRecord) {
-                System.out.println("Warning: Some saved tasks could not be loaded.");
-            }
+            LoadStatus status = hasInvalidRecord ? LoadStatus.PARTIAL_LOAD : LoadStatus.SUCCESS;
+            return new LoadResult(tasks, status);
         } catch (IOException | SecurityException exception) {
-            System.out.println("Warning: Saved tasks could not be loaded.");
+            return new LoadResult(tasks, LoadStatus.LOAD_FAILURE);
         }
-        return tasks;
     }
 
     /**
@@ -210,5 +207,30 @@ public final class Storage {
         }
         fields.add(field.toString());
         return fields;
+    }
+
+    /**
+     * Describes the outcome of loading tasks from storage.
+     */
+    public enum LoadStatus {
+        SUCCESS,
+        INVALID_HEADER,
+        PARTIAL_LOAD,
+        LOAD_FAILURE
+    }
+
+    /**
+     * Stores tasks loaded from storage and the loading outcome.
+     *
+     * @param tasks tasks that were loaded successfully.
+     * @param status outcome of the loading operation.
+     */
+    public record LoadResult(List<Task> tasks, LoadStatus status) {
+        /**
+         * Creates an immutable snapshot of a storage loading result.
+         */
+        public LoadResult {
+            tasks = List.copyOf(tasks);
+        }
     }
 }

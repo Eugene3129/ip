@@ -16,10 +16,21 @@ public final class TaskList {
     private final ArrayList<Task> tasks;
 
     /**
-     * Creates a task list loaded from the local data file.
+     * Creates a task list containing previously loaded tasks.
+     *
+     * @param tasks tasks with which to initialize the list.
      */
-    public TaskList() {
-        this.tasks = Storage.loadTasks(MAX_TASKS);
+    public TaskList(List<Task> tasks) {
+        this.tasks = new ArrayList<>(tasks);
+    }
+
+    /**
+     * Returns the maximum number of tasks that can be stored.
+     *
+     * @return maximum task-list capacity.
+     */
+    public static int getMaximumTaskCapacity() {
+        return MAX_TASKS;
     }
 
     /**
