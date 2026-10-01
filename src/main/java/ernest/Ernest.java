@@ -44,9 +44,7 @@ public final class Ernest {
     public void run() {
         try {
             ui.showWelcomeMessage();
-            if (runChat()) {
-                ui.showGoodbyeMessage();
-            }
+            runChat();
         } finally {
             ui.close();
         }
@@ -55,35 +53,40 @@ public final class Ernest {
     /**
      * Reads and processes commands until the user exits or input ends.
      */
-    private boolean runChat() {
+    private void runChat() {
         while (ui.hasNextCommand()) {
-            String command = ui.readCommand();
+            Parser.ParsedCommand command = Parser.parse(ui.readCommand());
 
-            if (!processCommand(command)) {
-                return true;
+            if (isExitCommand(command)) {
+                ui.showGoodbyeMessage();
+                return;
             }
+            handleCommand(command);
         }
-        return false;
     }
 
     /**
-     * Processes one command and prints the corresponding response.
+     * Returns whether the command requests a valid chat exit.
      *
-     * @param commandLine command entered by the user.
-     * @return false when the command ends the chat; otherwise true.
+     * @param command parsed command entered by the user.
+     * @return true if the command exits the chat; otherwise false.
      */
-    private boolean processCommand(String commandLine) {
-        Parser.ParsedCommand command = Parser.parse(commandLine);
+    private static boolean isExitCommand(Parser.ParsedCommand command) {
+        return command.parts().length == 1 && COMMAND_BYE.equals(command.parts()[0]);
+    }
 
+    /**
+     * Handles one command and prints the corresponding response.
+     *
+     * @param command parsed command entered by the user.
+     */
+    private void handleCommand(Parser.ParsedCommand command) {
         if (command.parts().length == 0) {
             ui.showInvalidCommandMessage();
         } else {
             String commandWord = command.parts()[0];
             switch (commandWord) {
                 case COMMAND_BYE:
-                    if (command.parts().length == 1) {
-                        return false;
-                    }
                     ui.showInvalidCommandMessage();
                     break;
                 case COMMAND_LIST:
@@ -134,6 +137,5 @@ public final class Ernest {
         }
 
         ui.showHorizontalLine();
-        return true;
     }
 }
