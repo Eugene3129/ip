@@ -15,8 +15,18 @@ public final class Ernest {
     private static final String COMMAND_DEADLINE = "deadline";
     private static final String COMMAND_EVENT = "event";
 
-    private Ernest() {
-        // Prevent instantiation of this utility class.
+    /** Task list managed by this Ernest instance. */
+    private final TaskList taskList;
+
+    /** User interface used for console input and output. */
+    private final Ui ui;
+
+    /**
+     * Creates an Ernest task manager with its task list and user interface.
+     */
+    public Ernest() {
+        this.taskList = new TaskList();
+        this.ui = new Ui();
     }
 
     /**
@@ -25,23 +35,31 @@ public final class Ernest {
      * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
-        TaskList taskList = new TaskList();
-        try (Ui ui = new Ui()) {
+        new Ernest().run();
+    }
+
+    /**
+     * Runs the command loop until the user exits or input ends.
+     */
+    public void run() {
+        try {
             ui.showWelcomeMessage();
-            if (runChat(taskList, ui)) {
+            if (runChat()) {
                 ui.showGoodbyeMessage();
             }
+        } finally {
+            ui.close();
         }
     }
 
     /**
      * Reads and processes commands until the user exits or input ends.
      */
-    private static boolean runChat(TaskList taskList, Ui ui) {
+    private boolean runChat() {
         while (ui.hasNextCommand()) {
             String command = ui.readCommand();
 
-            if (!processCommand(command, taskList, ui)) {
+            if (!processCommand(command)) {
                 return true;
             }
         }
@@ -52,11 +70,9 @@ public final class Ernest {
      * Processes one command and prints the corresponding response.
      *
      * @param commandLine command entered by the user.
-     * @param taskList task list to update or display.
-     * @param ui user interface used to display command responses.
      * @return false when the command ends the chat; otherwise true.
      */
-    private static boolean processCommand(String commandLine, TaskList taskList, Ui ui) {
+    private boolean processCommand(String commandLine) {
         Parser.ParsedCommand command = Parser.parse(commandLine);
 
         if (command.parts().length == 0) {
