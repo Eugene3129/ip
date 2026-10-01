@@ -97,6 +97,13 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows confirmation that all tasks were removed.
+     */
+    public void showTaskListClearedMessage() {
+        System.out.println("Task list cleared.");
+    }
+
+    /**
      * Shows the commands supported by Ernest.
      */
     public void showHelpMessage() {

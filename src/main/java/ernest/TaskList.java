@@ -46,7 +46,6 @@ public final class TaskList {
     public void clearTasks() {
         tasks.clear();
         saveTasks();
-        System.out.println("Task list cleared.");
     }
 
     /**

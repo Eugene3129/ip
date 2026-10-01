@@ -108,6 +108,7 @@ public final class Ernest {
                 case COMMAND_CLEAR:
                     if (command.parts().length == 1) {
                         taskList.clearTasks();
+                        ui.showTaskListClearedMessage();
                     } else {
                         ui.showInvalidCommandMessage();
                     }
