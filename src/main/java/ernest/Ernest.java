@@ -107,7 +107,8 @@ public final class Ernest {
                     break;
                 case COMMAND_CLEAR:
                     if (command.parts().length == 1) {
-                        taskList.clearTasks();
+                        TaskList.OperationResult<Integer> result = taskList.clearTasks();
+                        showSaveWarning(result);
                         ui.showTaskListClearedMessage();
                     } else {
                         ui.showInvalidCommandMessage();
@@ -156,8 +157,10 @@ public final class Ernest {
      * @param task parsed task to add.
      */
     private void addTask(Task task) {
-        TaskList.AddStatus status = taskList.addTask(task);
-        switch (status) {
+        TaskList.OperationResult<TaskList.AddStatus> result = taskList.addTask(task);
+        showSaveWarning(result);
+
+        switch (result.outcome()) {
             case SUCCESS:
                 ui.showTaskAddedMessage(task, taskList.getTaskCount(),
                         taskList.getMaximumTaskCount());
@@ -218,7 +221,10 @@ public final class Ernest {
      * @param taskNumber one-based number of the task to delete.
      */
     private void deleteTask(int taskNumber) {
-        Optional<Task> deletedTask = taskList.deleteTask(taskNumber);
+        TaskList.OperationResult<Optional<Task>> result = taskList.deleteTask(taskNumber);
+        showSaveWarning(result);
+
+        Optional<Task> deletedTask = result.outcome();
         if (deletedTask.isPresent()) {
             ui.showTaskDeletedMessage(deletedTask.get(), taskList.getTaskCount(),
                     taskList.getMaximumTaskCount());
@@ -233,8 +239,10 @@ public final class Ernest {
      * @param taskNumber one-based number of the task to mark.
      */
     private void markTask(int taskNumber) {
-        TaskList.MarkStatus status = taskList.markTask(taskNumber);
-        switch (status) {
+        TaskList.OperationResult<TaskList.MarkStatus> result = taskList.markTask(taskNumber);
+        showSaveWarning(result);
+
+        switch (result.outcome()) {
             case SUCCESS:
                 ui.showTaskMarkedMessage(taskNumber);
                 break;
@@ -253,8 +261,10 @@ public final class Ernest {
      * @param taskNumber one-based number of the task to unmark.
      */
     private void unmarkTask(int taskNumber) {
-        TaskList.UnmarkStatus status = taskList.unmarkTask(taskNumber);
-        switch (status) {
+        TaskList.OperationResult<TaskList.UnmarkStatus> result = taskList.unmarkTask(taskNumber);
+        showSaveWarning(result);
+
+        switch (result.outcome()) {
             case SUCCESS:
                 ui.showTaskUnmarkedMessage(taskNumber);
                 break;
@@ -264,6 +274,17 @@ public final class Ernest {
             case ALREADY_NOT_DONE:
                 ui.showTaskAlreadyNotDoneMessage(taskNumber);
                 break;
+        }
+    }
+
+    /**
+     * Shows a warning when a task-list mutation could not be saved.
+     *
+     * @param result task-list operation result to check.
+     */
+    private void showSaveWarning(TaskList.OperationResult<?> result) {
+        if (result.hasSaveFailure()) {
+            ui.showSaveErrorMessage();
         }
     }
 }

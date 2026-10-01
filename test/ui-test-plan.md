@@ -11,8 +11,9 @@ This plan exercises the stdin/console interface of
   directory before testing.
 - Each test case runs in a fresh process and temporary working directory. Input
   lines are sent in order, one command per line, and `bye` ends the session.
-- Each successful add, mark, or unmark command writes the current task list to
-  `data/ernest.txt` as CSV. Ernest loads this file when it starts.
+- Each successful add, delete, mark, unmark, or clear command writes the
+  current task list to `data/ernest.txt` as CSV. Ernest loads this file when it
+  starts.
 - A test case may include an optional `Initial data` CSV block. The runner
   writes it to `data/ernest.txt` before starting that case.
 - A test case may include an optional `Expected saved data` CSV block. The
@@ -1033,13 +1034,17 @@ ______________________________________
 
 ## Test case: Warn when saving fails
 
-Aim: Verify that Ernest informs the user when a task is changed but cannot be saved.
+Aim: Verify that Ernest informs the user when each task-list mutation cannot be saved.
 
 Data directory is a file:
 
 Inputs:
 ```text
 todo unsaved task
+mark 1
+unmark 1
+delete 1
+clear
 bye
 ```
 
@@ -1060,6 +1065,20 @@ Warning: Task changes could not be saved.
 Ok, I've added to the task list:
 > [T][ ] unsaved task
 Current list size: 1/100
+______________________________________
+Warning: Task changes could not be saved.
+Well done! Marked task 1 as done.
+______________________________________
+Warning: Task changes could not be saved.
+Ok, marked task 1 as not done yet.
+______________________________________
+Warning: Task changes could not be saved.
+Ok, I've deleted this task from the task list:
+> [T][ ] unsaved task
+Current list size: 0/100
+______________________________________
+Warning: Task changes could not be saved.
+Task list cleared.
 ______________________________________
 Bye. See you again soon!
 ______________________________________

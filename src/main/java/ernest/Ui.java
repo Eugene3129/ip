@@ -169,6 +169,13 @@ public final class Ui implements AutoCloseable {
     }
 
     /**
+     * Shows a warning that task changes could not be saved.
+     */
+    public void showSaveErrorMessage() {
+        System.out.println("Warning: Task changes could not be saved.");
+    }
+
+    /**
      * Shows the task added to the list and the remaining capacity.
      *
      * @param task added task.
