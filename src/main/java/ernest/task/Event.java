@@ -40,6 +40,11 @@ public class Event extends Task {
         return this.endDateTime;
     }
 
+    /**
+     * Returns this task formatted with its event period.
+     *
+     * @return display representation of this event task.
+     */
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + startDateTime + " to: " + endDateTime + ")";

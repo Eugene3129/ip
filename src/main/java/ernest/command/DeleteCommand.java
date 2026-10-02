@@ -23,6 +23,13 @@ public final class DeleteCommand extends Command {
         this.taskNumber = taskNumber;
     }
 
+    /**
+     * Deletes the configured task and reports whether its number is valid.
+     *
+     * @param taskList task list from which the task is deleted.
+     * @param ui user interface through which the result is displayed.
+     * @param storage storage to which the updated task list is saved.
+     */
     @Override
     public void execute(TaskList taskList, Ui ui, Storage storage) {
         Optional<Task> deletedTask = taskList.deleteTask(taskNumber);

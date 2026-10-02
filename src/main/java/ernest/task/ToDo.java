@@ -13,6 +13,11 @@ public class ToDo extends Task {
         super(description);
     }
 
+    /**
+     * Returns this task formatted as a to-do item.
+     *
+     * @return display representation of this to-do task.
+     */
     @Override
     public String toString() {
         return "[T]" + super.toString();

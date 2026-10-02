@@ -20,6 +20,13 @@ public final class UnmarkCommand extends Command {
         this.taskNumber = taskNumber;
     }
 
+    /**
+     * Marks the configured task as not done and reports the result.
+     *
+     * @param taskList task list containing the task to unmark.
+     * @param ui user interface through which the result is displayed.
+     * @param storage storage to which the updated task list is saved.
+     */
     @Override
     public void execute(TaskList taskList, Ui ui, Storage storage) {
         TaskList.UnmarkStatus status = taskList.unmarkTask(taskNumber);

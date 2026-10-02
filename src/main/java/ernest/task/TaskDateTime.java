@@ -53,6 +53,11 @@ public final class TaskDateTime {
         return time == null ? date.toString() : LocalDateTime.of(date, time).toString();
     }
 
+    /**
+     * Returns this value in the user-facing date or date-time format.
+     *
+     * @return formatted date or date-time text.
+     */
     @Override
     public String toString() {
         return time == null
