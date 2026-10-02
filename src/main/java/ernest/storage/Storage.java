@@ -3,11 +3,15 @@ package ernest.storage;
 import ernest.task.Deadline;
 import ernest.task.Event;
 import ernest.task.Task;
+import ernest.task.TaskDateTime;
 import ernest.task.ToDo;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,10 +112,11 @@ public final class Storage {
      */
     private static String toCsvRecord(Task task) {
         if (task instanceof Deadline deadline) {
-            return toCsvRecord("deadline", deadline, deadline.getDueDate(), "", "");
+            return toCsvRecord("deadline", deadline, deadline.getDueDateTime().toStorageString(), "", "");
         }
         if (task instanceof Event event) {
-            return toCsvRecord("event", event, "", event.getDurationStart(), event.getDurationEnd());
+            return toCsvRecord("event", event, "", event.getStartDateTime().toStorageString(),
+                    event.getEndDateTime().toStorageString());
         }
         return toCsvRecord("todo", task, "", "", "");
     }
@@ -121,9 +126,9 @@ public final class Storage {
      *
      * @param type task type.
      * @param task task containing the shared fields.
-     * @param deadline deadline date, if applicable.
-     * @param startTime event start time, if applicable.
-     * @param endTime event end time, if applicable.
+     * @param deadline deadline date and optional time, if applicable.
+     * @param startTime event start date and optional time, if applicable.
+     * @param endTime event end date and optional time, if applicable.
      * @return CSV record for the supplied columns.
      */
     private static String toCsvRecord(String type, Task task, String deadline, String startTime, String endTime) {
@@ -159,21 +164,38 @@ public final class Storage {
         };
 
         Task task;
-        switch (fields.get(0)) {
-            case "todo":
-                task = new ToDo(fields.get(2));
-                break;
-            case "deadline":
-                task = new Deadline(fields.get(2), fields.get(3));
-                break;
-            case "event":
-                task = new Event(fields.get(2), fields.get(4), fields.get(5));
-                break;
-            default:
-                throw new IllegalArgumentException("Task record has an unknown type.");
+        try {
+            switch (fields.get(0)) {
+                case "todo":
+                    task = new ToDo(fields.get(2));
+                    break;
+                case "deadline":
+                    task = new Deadline(fields.get(2), parseTaskDateTime(fields.get(3)));
+                    break;
+                case "event":
+                    task = new Event(fields.get(2), parseTaskDateTime(fields.get(4)),
+                            parseTaskDateTime(fields.get(5)));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Task record has an unknown type.");
+            }
+        } catch (DateTimeParseException exception) {
+            throw new IllegalArgumentException("Task record contains an invalid date or time.", exception);
         }
         task.setDone(isDone);
         return task;
+    }
+
+    /**
+     * Returns a stored date with its optional time.
+     *
+     * @param value ISO date or date-time text.
+     * @return parsed task date and optional time.
+     */
+    private static TaskDateTime parseTaskDateTime(String value) {
+        return value.contains("T")
+                ? new TaskDateTime(LocalDateTime.parse(value))
+                : new TaskDateTime(LocalDate.parse(value));
     }
 
     /**

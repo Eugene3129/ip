@@ -1,47 +1,47 @@
 package ernest.task;
 
 /**
- * Represents a task that occurs within a time range.
+ * Represents a task that occurs within a date-time range.
  */
 public class Event extends Task {
     /** Start of the event. */
-    private final String durationStart;
+    private final TaskDateTime startDateTime;
     /** End of the event. */
-    private final String durationEnd;
+    private final TaskDateTime endDateTime;
 
     /**
      * Creates an event task.
      *
      * @param description description of the task.
-     * @param durationStart start of the event.
-     * @param durationEnd end of the event.
+     * @param startDateTime start date and optional time of the event.
+     * @param endDateTime end date and optional time of the event.
      */
-    public Event(String description, String durationStart, String durationEnd) {
+    public Event(String description, TaskDateTime startDateTime, TaskDateTime endDateTime) {
         super(description);
-        this.durationStart = durationStart;
-        this.durationEnd = durationEnd;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
     }
 
     /**
-     * Returns this event's start time.
+     * Returns this event's start date and optional time.
      *
-     * @return start time.
+     * @return start date and optional time.
      */
-    public String getDurationStart() {
-        return this.durationStart;
+    public TaskDateTime getStartDateTime() {
+        return this.startDateTime;
     }
 
     /**
-     * Returns this event's end time.
+     * Returns this event's end date and optional time.
      *
-     * @return end time.
+     * @return end date and optional time.
      */
-    public String getDurationEnd() {
-        return this.durationEnd;
+    public TaskDateTime getEndDateTime() {
+        return this.endDateTime;
     }
 
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + durationStart + " to: " + durationEnd + ")";
+        return "[E]" + super.toString() + " (from: " + startDateTime + " to: " + endDateTime + ")";
     }
 }
