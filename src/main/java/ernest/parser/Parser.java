@@ -5,6 +5,7 @@ import ernest.command.ClearCommand;
 import ernest.command.Command;
 import ernest.command.DeleteCommand;
 import ernest.command.ExitCommand;
+import ernest.command.FindCommand;
 import ernest.command.HelpCommand;
 import ernest.command.InvalidCommand;
 import ernest.command.ListCommand;
@@ -37,6 +38,7 @@ public final class Parser {
     private static final String COMMAND_BYE = "bye";
     private static final String COMMAND_LIST = "list";
     private static final String COMMAND_DELETE = "delete";
+    private static final String COMMAND_FIND = "find";
     private static final String COMMAND_MARK = "mark";
     private static final String COMMAND_UNMARK = "unmark";
     private static final String COMMAND_CLEAR = "clear";
@@ -72,6 +74,7 @@ public final class Parser {
     private static final String ERROR_MISSING_TASK_NUMBER =
             "Missing task number. Please refer to the task list and try again.";
     private static final String ERROR_NON_INTEGER_TASK_NUMBER = "Task number must be an integer.";
+    private static final String ERROR_MISSING_SEARCH_KEYWORD = "Missing search keyword. Please try again.";
 
     private Parser() {
         // Prevent instantiation of this utility class.
@@ -102,6 +105,8 @@ public final class Parser {
                 // Fallthrough
             case COMMAND_UNMARK:
                 return parseNumberedCommand(command);
+            case COMMAND_FIND:
+                return parseFindCommand(command);
             case COMMAND_CLEAR:
                 return command.parts().length == 1 ? new ClearCommand() : new InvalidCommand();
             case COMMAND_HELP:
@@ -140,6 +145,20 @@ public final class Parser {
      */
     private static Command parseAddCommand(ParsedCommand command) throws ErnestException {
         return new AddCommand(parseTask(command));
+    }
+
+    /**
+     * Returns a find command containing the user's search keyword.
+     *
+     * @param command parsed find command.
+     * @return executable command represented by the input.
+     * @throws ErnestException if the search keyword is missing.
+     */
+    private static Command parseFindCommand(ParsedCommand command) throws ErnestException {
+        if (command.parts().length < 2 || command.parts()[1].isEmpty()) {
+            throw new ErnestException(ERROR_MISSING_SEARCH_KEYWORD);
+        }
+        return new FindCommand(command.parts()[1]);
     }
 
     /**
