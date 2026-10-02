@@ -29,4 +29,4 @@ Used Codex for the following:
    - Ask general questions during most of my coding
    - Generate an ASCII-art banner for the chatbot name, then I manually edited it
    - Refactor code
-   - Suggest and implement improvements when I'm stuck on how to improve the code
+   - Suggest and implement when I'm stuck on how to improve or implement the code
