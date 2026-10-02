@@ -1,35 +1,34 @@
 package ernest.task;
 
 /**
- * Represents a task that has a due date.
+ * Represents a task that has a due date and an optional time.
  */
 public class Deadline extends Task {
-
-    /** Due date associated with this task. */
-    private final String dueDate;
+    /** Due date and optional time associated with this task. */
+    private final TaskDateTime dueDateTime;
 
     /**
      * Creates a deadline task.
      *
      * @param description description of the task.
-     * @param dueDate due date for the task.
+     * @param dueDateTime due date and optional time for the task.
      */
-    public Deadline(String description, String dueDate) {
+    public Deadline(String description, TaskDateTime dueDateTime) {
         super(description);
-        this.dueDate = dueDate;
+        this.dueDateTime = dueDateTime;
     }
 
     /**
-     * Returns this deadline's due date.
+     * Returns this deadline's due date and optional time.
      *
-     * @return due date.
+     * @return due date and optional time.
      */
-    public String getDueDate() {
-        return this.dueDate;
+    public TaskDateTime getDueDateTime() {
+        return this.dueDateTime;
     }
 
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + dueDate + ")";
+        return "[D]" + super.toString() + " (by: " + dueDateTime + ")";
     }
 }

@@ -218,8 +218,8 @@ public final class Ui implements AutoCloseable {
     public void showHelpMessage() {
         System.out.println("Available commands:");
         System.out.println("todo DESCRIPTION");
-        System.out.println("deadline DESCRIPTION /by DATE");
-        System.out.println("event DESCRIPTION /from START /to END");
+        System.out.println("deadline DESCRIPTION /by yyyy-MM-dd [HHmm|HH:mm]");
+        System.out.println("event DESCRIPTION /from yyyy-MM-dd [HHmm|HH:mm] /to yyyy-MM-dd [HHmm|HH:mm]");
         System.out.println("list, mark NUMBER, unmark NUMBER, clear, help, bye");
     }
 
