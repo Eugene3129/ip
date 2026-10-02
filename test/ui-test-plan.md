@@ -105,6 +105,7 @@ type,isDone,description,deadline,startTime,endTime
 "deadline","maybe","invalid status","Friday","",""
 "unknown","false","invalid type","","",""
 "event","false","unfinished
+"event","false","reversed event","","2026-12-04","2026-12-03"
 "todo","true","also keep this task","","",""
 ```
 
@@ -884,6 +885,59 @@ ______________________________________
 The /to marker must come after /from.
 ______________________________________
 Your to-do list is:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Validate event chronology
+
+Aim: Verify that events reject reversed dates and times while allowing equal endpoints and mixed precision.
+
+Inputs:
+```text
+event reversed dates /from 2026-12-04 /to 2026-12-03
+event reversed times /from 2026-12-04 1400 /to 2026-12-04 13:00
+event equal dates /from 2026-12-04 /to 2026-12-04
+event equal times /from 2026-12-04 1400 /to 2026-12-04 14:00
+event mixed precision /from 2026-12-04 1400 /to 2026-12-04
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Event end cannot be before its start.
+______________________________________
+Event end cannot be before its start.
+______________________________________
+Ok, I've added to the task list:
+> [E][ ] equal dates (from: Dec 4 2026 to: Dec 4 2026)
+Current list size: 1/100
+______________________________________
+Ok, I've added to the task list:
+> [E][ ] equal times (from: Dec 4 2026, 2:00 PM to: Dec 4 2026, 2:00 PM)
+Current list size: 2/100
+______________________________________
+Ok, I've added to the task list:
+> [E][ ] mixed precision (from: Dec 4 2026, 2:00 PM to: Dec 4 2026)
+Current list size: 3/100
+______________________________________
+Your to-do list is:
+1. [E][ ] equal dates (from: Dec 4 2026 to: Dec 4 2026)
+2. [E][ ] equal times (from: Dec 4 2026, 2:00 PM to: Dec 4 2026, 2:00 PM)
+3. [E][ ] mixed precision (from: Dec 4 2026, 2:00 PM to: Dec 4 2026)
 ______________________________________
 Bye. See you again soon!
 ______________________________________

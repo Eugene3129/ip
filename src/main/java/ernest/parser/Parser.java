@@ -69,6 +69,7 @@ public final class Parser {
     private static final String ERROR_MISSING_EVENT_END = "Missing event end date. Please try again.";
     private static final String ERROR_INVALID_EVENT_DATE_TIME =
             "Invalid event date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.";
+    private static final String ERROR_EVENT_END_BEFORE_START = "Event end cannot be before its start.";
     private static final String ERROR_MISSING_TASK_NUMBER =
             "Missing task number. Please refer to the task list and try again.";
     private static final String ERROR_NON_INTEGER_TASK_NUMBER = "Task number must be an integer.";
@@ -297,7 +298,12 @@ public final class Parser {
             throw new ErnestException(ERROR_MISSING_EVENT_END);
         }
         try {
-            return new Event(taskName, parseDateTime(durationStart), parseDateTime(durationEnd));
+            TaskDateTime startDateTime = parseDateTime(durationStart);
+            TaskDateTime endDateTime = parseDateTime(durationEnd);
+            if (endDateTime.isBefore(startDateTime)) {
+                throw new ErnestException(ERROR_EVENT_END_BEFORE_START);
+            }
+            return new Event(taskName, startDateTime, endDateTime);
         } catch (DateTimeParseException exception) {
             throw new ErnestException(ERROR_INVALID_EVENT_DATE_TIME);
         }
