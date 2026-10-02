@@ -101,6 +101,27 @@ public final class Ui implements AutoCloseable {
     public void showTaskList(List<Task> tasks) {
         System.out.println("Your to-do list is:");
 
+        showNumberedTasks(tasks);
+    }
+
+    /**
+     * Shows tasks that match a find command.
+     *
+     * @param tasks matching tasks in list order.
+     */
+    public void showMatchingTasks(List<Task> tasks) {
+        System.out.println("Here are the matching tasks in your list:");
+
+        showNumberedTasks(tasks);
+    }
+
+    /**
+     * Shows tasks as a one-based numbered list.
+     *
+     * @param tasks tasks to display in list order.
+     */
+    private void showNumberedTasks(List<Task> tasks) {
+
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
             System.out.println((i + 1) + ". " + task);
@@ -218,9 +239,10 @@ public final class Ui implements AutoCloseable {
     public void showHelpMessage() {
         System.out.println("Available commands:");
         System.out.println("todo DESCRIPTION");
-        System.out.println("deadline DESCRIPTION /by DATE");
-        System.out.println("event DESCRIPTION /from START /to END");
-        System.out.println("list, mark NUMBER, unmark NUMBER, clear, help, bye");
+        System.out.println("deadline DESCRIPTION /by yyyy-MM-dd [HHmm|HH:mm]");
+        System.out.println("event DESCRIPTION /from yyyy-MM-dd [HHmm|HH:mm] /to yyyy-MM-dd [HHmm|HH:mm]");
+        System.out.println("find KEYWORD");
+        System.out.println("list, delete NUMBER, mark NUMBER, unmark NUMBER, clear, help, bye");
     }
 
     /**

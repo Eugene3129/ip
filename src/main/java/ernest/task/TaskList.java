@@ -2,6 +2,7 @@ package ernest.task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -58,6 +59,19 @@ public final class TaskList {
      */
     public int getMaximumTaskCount() {
         return MAX_TASKS;
+    }
+
+    /**
+     * Returns tasks whose descriptions contain the given keyword, ignoring case.
+     *
+     * @param keyword text to search for within task descriptions.
+     * @return matching tasks in their current list order.
+     */
+    public List<Task> findTasks(String keyword) {
+        String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+        return tasks.stream()
+                .filter(task -> task.getTaskName().toLowerCase(Locale.ROOT).contains(normalizedKeyword))
+                .toList();
     }
 
     /**

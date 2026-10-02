@@ -1034,9 +1034,102 @@ ______________________________________
 (Type "bye" to exit the chat)
 Available commands:
 todo DESCRIPTION
-deadline DESCRIPTION /by DATE
-event DESCRIPTION /from START /to END
-list, mark NUMBER, unmark NUMBER, clear, help, bye
+deadline DESCRIPTION /by yyyy-MM-dd [HHmm|HH:mm]
+event DESCRIPTION /from yyyy-MM-dd [HHmm|HH:mm] /to yyyy-MM-dd [HHmm|HH:mm]
+find KEYWORD
+list, delete NUMBER, mark NUMBER, unmark NUMBER, clear, help, bye
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Find tasks using an approximate case-insensitive keyword
+
+Aim: Verify that `find` performs a case-insensitive partial-description search,
+preserves matching task order and state, and displays an empty result when no
+task matches.
+
+Inputs:
+```text
+todo Read the Course Notes
+deadline submit Final Report /by 2026-10-09 18:00
+todo review REPORT outline
+mark 2
+find port
+find COURSE
+find final report
+find absent
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Ok, I've added to the task list:
+> [T][ ] Read the Course Notes
+Current list size: 1/100
+______________________________________
+Ok, I've added to the task list:
+> [D][ ] submit Final Report (by: Oct 9 2026, 6:00 PM)
+Current list size: 2/100
+______________________________________
+Ok, I've added to the task list:
+> [T][ ] review REPORT outline
+Current list size: 3/100
+______________________________________
+Well done! Marked task 2 as done.
+______________________________________
+Here are the matching tasks in your list:
+1. [D][X] submit Final Report (by: Oct 9 2026, 6:00 PM)
+2. [T][ ] review REPORT outline
+______________________________________
+Here are the matching tasks in your list:
+1. [T][ ] Read the Course Notes
+______________________________________
+Here are the matching tasks in your list:
+1. [D][X] submit Final Report (by: Oct 9 2026, 6:00 PM)
+______________________________________
+Here are the matching tasks in your list:
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Reject a find command without a keyword
+
+Aim: Verify that `find` requires non-empty search text and that Ernest remains
+available after reporting the missing keyword.
+
+Inputs:
+```text
+find
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Missing search keyword. Please try again.
 ______________________________________
 Bye. See you again soon!
 ______________________________________
