@@ -62,8 +62,8 @@ Initial data:
 ```csv
 type,isDone,description,deadline,startTime,endTime
 "todo","true","finish assignment","","",""
-"deadline","false","submit report","Friday","",""
-"event","false","team meeting","","10am","11am"
+"deadline","false","submit report","2026-10-09T18:00","",""
+"event","false","team meeting","","2026-10-09T10:00","2026-10-09T11:00"
 ```
 
 Inputs:
@@ -87,8 +87,8 @@ ______________________________________
 (Type "bye" to exit the chat)
 Your to-do list is:
 1. [T][X] finish assignment
-2. [D][ ] submit report (by: Friday)
-3. [E][ ] team meeting (from: 10am to: 11am)
+2. [D][ ] submit report (by: Oct 9 2026, 6:00 PM)
+3. [E][ ] team meeting (from: Oct 9 2026, 10:00 AM to: Oct 9 2026, 11:00 AM)
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -179,8 +179,8 @@ Aim: Verify that task types and task markers are case-insensitive while task des
 Inputs:
 ```text
 TODO Buy Milk
-DEADLINE Submit Report /BY Friday
-EVENT Team Meeting /FROM 10am /TO 11am
+DEADLINE Submit Report /BY 2026-10-09 18:00
+EVENT Team Meeting /FROM 2026-10-09 10:00 /TO 2026-10-09 11:00
 todoist invalid
 unmarkable 1
 list
@@ -205,11 +205,11 @@ Ok, I've added to the task list:
 Current list size: 1/100
 ______________________________________
 Ok, I've added to the task list:
-> [D][ ] Submit Report (by: Friday)
+> [D][ ] Submit Report (by: Oct 9 2026, 6:00 PM)
 Current list size: 2/100
 ______________________________________
 Ok, I've added to the task list:
-> [E][ ] Team Meeting (from: 10am to: 11am)
+> [E][ ] Team Meeting (from: Oct 9 2026, 10:00 AM to: Oct 9 2026, 11:00 AM)
 Current list size: 3/100
 ______________________________________
 Sorry, please insert a valid command.
@@ -218,8 +218,8 @@ Sorry, please insert a valid command.
 ______________________________________
 Your to-do list is:
 1. [T][ ] Buy Milk
-2. [D][ ] Submit Report (by: Friday)
-3. [E][ ] Team Meeting (from: 10am to: 11am)
+2. [D][ ] Submit Report (by: Oct 9 2026, 6:00 PM)
+3. [E][ ] Team Meeting (from: Oct 9 2026, 10:00 AM to: Oct 9 2026, 11:00 AM)
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -231,11 +231,11 @@ Aim: Verify that deadline and event commands reject missing descriptions, dates,
 
 Inputs:
 ```text
-deadline /by Friday
+deadline /by 2026-10-09 1800
 deadline submit report /by
-event /from 10am /to 11am
-event meeting /from /to 11am
-event meeting /from 10am /to
+event /from 2026-10-09 10:00 /to 2026-10-09 11:00
+event meeting /from /to 2026-10-09 11:00
+event meeting /from 2026-10-09 10:00 /to
 todo valid task
 list
 bye
@@ -260,9 +260,9 @@ Missing deadline date. Please try again.
 ______________________________________
 Missing event description. Please try again.
 ______________________________________
-Missing event start time. Please try again.
+Missing event start date. Please try again.
 ______________________________________
-Missing event end time. Please try again.
+Missing event end date. Please try again.
 ______________________________________
 Ok, I've added to the task list:
 > [T][ ] valid task
@@ -332,8 +332,8 @@ Aim: Verify that todo, deadline, and event commands can be interleaved while pre
 Inputs:
 ```text
 todo review the lecture
-deadline submit the assignment /by Friday
-event project discussion /from 2pm /to 3pm
+deadline submit the assignment /by 2026-10-09 1800
+event project discussion /from 2026-10-09 14:00 /to 2026-10-09 15:00
 list
 bye
 ```
@@ -356,17 +356,17 @@ Ok, I've added to the task list:
 Current list size: 1/100
 ______________________________________
 Ok, I've added to the task list:
-> [D][ ] submit the assignment (by: Friday)
+> [D][ ] submit the assignment (by: Oct 9 2026, 6:00 PM)
 Current list size: 2/100
 ______________________________________
 Ok, I've added to the task list:
-> [E][ ] project discussion (from: 2pm to: 3pm)
+> [E][ ] project discussion (from: Oct 9 2026, 2:00 PM to: Oct 9 2026, 3:00 PM)
 Current list size: 3/100
 ______________________________________
 Your to-do list is:
 1. [T][ ] review the lecture
-2. [D][ ] submit the assignment (by: Friday)
-3. [E][ ] project discussion (from: 2pm to: 3pm)
+2. [D][ ] submit the assignment (by: Oct 9 2026, 6:00 PM)
+3. [E][ ] project discussion (from: Oct 9 2026, 2:00 PM to: Oct 9 2026, 3:00 PM)
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -550,7 +550,7 @@ ______________________________________
 (Type "bye" to exit the chat)
 Deadline must include a /by date.
 ______________________________________
-Event must include a /from time.
+Event must include a /from date.
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -558,11 +558,11 @@ ______________________________________
 
 ## Test case: Add and list a deadline
 
-Aim: Verify that a deadline command stores the task description and due date, and `list` displays both values.
+Aim: Verify that a deadline command stores the description, due date, and due time, and displays all values.
 
 Inputs:
 ```text
-deadline submit assignment /by Friday
+deadline submit assignment /by 2026-10-09 1800
 list
 bye
 ```
@@ -581,11 +581,11 @@ How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
 Ok, I've added to the task list:
-> [D][ ] submit assignment (by: Friday)
+> [D][ ] submit assignment (by: Oct 9 2026, 6:00 PM)
 Current list size: 1/100
 ______________________________________
 Your to-do list is:
-1. [D][ ] submit assignment (by: Friday)
+1. [D][ ] submit assignment (by: Oct 9 2026, 6:00 PM)
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -593,11 +593,11 @@ ______________________________________
 
 ## Test case: Add and list an event
 
-Aim: Verify that an event command stores the task description and time range, and `list` displays all event details.
+Aim: Verify that an event command stores and displays the description and complete date-time range.
 
 Inputs:
 ```text
-event team meeting /from 10am /to 11am
+event team meeting /from 2026-10-09 1000 /to 2026-10-09 1100
 list
 bye
 ```
@@ -616,11 +616,106 @@ How can I help you?
 ______________________________________
 (Type "bye" to exit the chat)
 Ok, I've added to the task list:
-> [E][ ] team meeting (from: 10am to: 11am)
+> [E][ ] team meeting (from: Oct 9 2026, 10:00 AM to: Oct 9 2026, 11:00 AM)
 Current list size: 1/100
 ______________________________________
 Your to-do list is:
-1. [E][ ] team meeting (from: 10am to: 11am)
+1. [E][ ] team meeting (from: Oct 9 2026, 10:00 AM to: Oct 9 2026, 11:00 AM)
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+## Test case: Accept date-only deadlines and events
+
+Aim: Verify that deadline and event dates can omit their optional times without adding a midnight time to the display.
+
+Inputs:
+```text
+deadline submit outline /by 2026-10-09
+event conference /from 2026-10-09 /to 2026-10-10
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Ok, I've added to the task list:
+> [D][ ] submit outline (by: Oct 9 2026)
+Current list size: 1/100
+______________________________________
+Ok, I've added to the task list:
+> [E][ ] conference (from: Oct 9 2026 to: Oct 10 2026)
+Current list size: 2/100
+______________________________________
+Your to-do list is:
+1. [D][ ] submit outline (by: Oct 9 2026)
+2. [E][ ] conference (from: Oct 9 2026 to: Oct 10 2026)
+______________________________________
+Bye. See you again soon!
+______________________________________
+```
+
+Expected saved data:
+```csv
+type,isDone,description,deadline,startTime,endTime
+"deadline","false","submit outline","2026-10-09","",""
+"event","false","conference","","2026-10-09","2026-10-10"
+```
+
+## Test case: Reject invalid dates and times
+
+Aim: Verify that Ernest rejects impossible values and values that do not use the documented date and time formats.
+
+Inputs:
+```text
+deadline impossible date /by 2026-02-30 0900
+deadline wrong date format /by 02/10/2026 0900
+event impossible time /from 2026-10-09 2400 /to 2026-10-09 0900
+event wrong time format /from 2026-10-09 9am /to 2026-10-09 10am
+event missing dates /from 0900 /to 1000
+event overly precise time /from 2026-10-09 09:00:30 /to 2026-10-09 10:00
+list
+bye
+```
+
+Expected output:
+```text
+______________________________________
+ _____ ____  _     _  ____  ____ _____
+| ____|  _ \| \   | | ____|/ ___|_   _|
+|  _| | |_) |  \  | |  _|  \___\  | |
+| |___|  _ /| | \ | | |___ ___) | | |
+|_____|_| \ |_|  \|_|_____||____/ |_|
+
+Hi! I'm Ernest.
+How can I help you?
+______________________________________
+(Type "bye" to exit the chat)
+Invalid deadline date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.
+______________________________________
+Invalid deadline date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.
+______________________________________
+Invalid event date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.
+______________________________________
+Invalid event date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.
+______________________________________
+Invalid event date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.
+______________________________________
+Invalid event date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.
+______________________________________
+Your to-do list is:
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -726,7 +821,7 @@ Inputs:
 ```text
 todo first task
 event missing markers
-deadline second task /by tomorrow
+deadline second task /by 2026-10-03 1700
 list
 bye
 ```
@@ -748,15 +843,15 @@ Ok, I've added to the task list:
 > [T][ ] first task
 Current list size: 1/100
 ______________________________________
-Event must include a /from time.
+Event must include a /from date.
 ______________________________________
 Ok, I've added to the task list:
-> [D][ ] second task (by: tomorrow)
+> [D][ ] second task (by: Oct 3 2026, 5:00 PM)
 Current list size: 2/100
 ______________________________________
 Your to-do list is:
 1. [T][ ] first task
-2. [D][ ] second task (by: tomorrow)
+2. [D][ ] second task (by: Oct 3 2026, 5:00 PM)
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -1036,8 +1131,8 @@ ______________________________________
 (Type "bye" to exit the chat)
 Available commands:
 todo DESCRIPTION
-deadline DESCRIPTION /by DATE
-event DESCRIPTION /from START /to END
+deadline DESCRIPTION /by yyyy-MM-dd [HHmm|HH:mm]
+event DESCRIPTION /from yyyy-MM-dd [HHmm|HH:mm] /to yyyy-MM-dd [HHmm|HH:mm]
 list, mark NUMBER, unmark NUMBER, clear, help, bye
 ______________________________________
 Bye. See you again soon!
@@ -1192,7 +1287,7 @@ ______________________________________
 (Type "bye" to exit the chat)
 Deadline may contain only one /by marker.
 ______________________________________
-Event must include a /to time.
+Event must include a /to date.
 ______________________________________
 Event may only contain one /from and one /to marker.
 ______________________________________
@@ -1212,8 +1307,8 @@ Initial data:
 ```csv
 type,isDone,description,deadline,startTime,endTime
 "todo","false","buy milk, eggs and ""bread""","","",""
-"deadline","true","submit ""final"", report","Friday, 5pm","",""
-"event","false","team ""sync"", weekly","","10am, sharp","11am"
+"deadline","true","submit ""final"", report","2026-10-09T18:00","",""
+"event","false","team ""sync"", weekly","","2026-10-09T10:00","2026-10-09T11:00"
 ```
 
 Inputs:
@@ -1240,8 +1335,8 @@ Well done! Marked task 1 as done.
 ______________________________________
 Your to-do list is:
 1. [T][X] buy milk, eggs and "bread"
-2. [D][X] submit "final", report (by: Friday, 5pm)
-3. [E][ ] team "sync", weekly (from: 10am, sharp to: 11am)
+2. [D][X] submit "final", report (by: Oct 9 2026, 6:00 PM)
+3. [E][ ] team "sync", weekly (from: Oct 9 2026, 10:00 AM to: Oct 9 2026, 11:00 AM)
 ______________________________________
 Bye. See you again soon!
 ______________________________________
@@ -1251,8 +1346,8 @@ Expected saved data:
 ```csv
 type,isDone,description,deadline,startTime,endTime
 "todo","true","buy milk, eggs and ""bread""","","",""
-"deadline","true","submit ""final"", report","Friday, 5pm","",""
-"event","false","team ""sync"", weekly","","10am, sharp","11am"
+"deadline","true","submit ""final"", report","2026-10-09T18:00","",""
+"event","false","team ""sync"", weekly","","2026-10-09T10:00","2026-10-09T11:00"
 ```
 
 ## Test case: Warn when loading fails
