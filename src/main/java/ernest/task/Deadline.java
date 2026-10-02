@@ -27,6 +27,11 @@ public class Deadline extends Task {
         return this.dueDateTime;
     }
 
+    /**
+     * Returns this task formatted with its deadline.
+     *
+     * @return display representation of this deadline task.
+     */
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + dueDateTime + ")";

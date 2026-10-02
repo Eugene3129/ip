@@ -252,6 +252,9 @@ public final class Ui implements AutoCloseable {
         System.out.println(HORIZONTAL_LINE);
     }
 
+    /**
+     * Closes the standard-input scanner used by this interface.
+     */
     @Override
     public void close() {
         scanner.close();

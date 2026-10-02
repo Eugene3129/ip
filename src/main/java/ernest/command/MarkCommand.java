@@ -20,6 +20,13 @@ public final class MarkCommand extends Command {
         this.taskNumber = taskNumber;
     }
 
+    /**
+     * Marks the configured task as done and reports the result.
+     *
+     * @param taskList task list containing the task to mark.
+     * @param ui user interface through which the result is displayed.
+     * @param storage storage to which the updated task list is saved.
+     */
     @Override
     public void execute(TaskList taskList, Ui ui, Storage storage) {
         TaskList.MarkStatus status = taskList.markTask(taskNumber);

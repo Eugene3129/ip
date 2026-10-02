@@ -21,6 +21,13 @@ public final class AddCommand extends Command {
         this.task = task;
     }
 
+    /**
+     * Adds the configured task and reports whether the task list has space.
+     *
+     * @param taskList task list to which the task is added.
+     * @param ui user interface through which the result is displayed.
+     * @param storage storage to which the updated task list is saved.
+     */
     @Override
     public void execute(TaskList taskList, Ui ui, Storage storage) {
         TaskList.AddStatus status = taskList.addTask(task);
