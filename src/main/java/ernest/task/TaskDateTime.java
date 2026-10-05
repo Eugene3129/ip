@@ -54,6 +54,22 @@ public final class TaskDateTime {
     }
 
     /**
+     * Returns whether this value occurs before another value.
+     * Dates are always compared. Times are compared only when both values include one.
+     *
+     * @param other value to compare against.
+     * @return true if this value occurs before the other value.
+     */
+    public boolean isBefore(TaskDateTime other) {
+        Objects.requireNonNull(other);
+        int dateComparison = date.compareTo(other.date);
+        if (dateComparison != 0) {
+            return dateComparison < 0;
+        }
+        return time != null && other.time != null && time.isBefore(other.time);
+    }
+
+    /**
      * Returns this value in the user-facing date or date-time format.
      *
      * @return formatted date or date-time text.
