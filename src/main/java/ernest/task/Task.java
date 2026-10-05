@@ -24,12 +24,22 @@ public class Task {
         this.isDone = false;
     }
 
+    /**
+     * Returns this task's completion status and description for display.
+     *
+     * @return display representation of this task.
+     */
     @Override
     public String toString() {
         String status = this.isDone ? "[X]" : "[ ]";
         return status + " " + this.taskName;
     }
 
+    /**
+     * Returns whether this task is completed.
+     *
+     * @return true if this task is completed; otherwise false.
+     */
     public boolean isDone() {
         return this.isDone;
     }
@@ -43,6 +53,11 @@ public class Task {
         return this.taskName;
     }
 
+    /**
+     * Sets whether this task is completed.
+     *
+     * @param isDone new completion status.
+     */
     public void setDone(boolean isDone) {
         this.isDone = isDone;
     }

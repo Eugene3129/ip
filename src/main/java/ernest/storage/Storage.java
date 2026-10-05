@@ -62,6 +62,7 @@ public final class Storage {
     /**
      * Returns tasks loaded from the data file, or an empty list when no data file exists.
      *
+     * @param maximumTasks maximum number of tasks to load.
      * @return tasks read from the data file.
      */
     public LoadResult loadTasks(int maximumTasks) {
