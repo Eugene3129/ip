@@ -23,6 +23,7 @@ class TestCase:
     initial_data: str
     expected_saved_data: str
     data_directory_is_file: bool
+    data_file_is_directory: bool
 
 
 def parse_args() -> argparse.Namespace:
@@ -99,8 +100,9 @@ def parse_plan(plan_path: Path) -> list[TestCase]:
         initial_data = normalize_newlines(extract_optional_block(body, "Initial data"))
         expected_saved_data = normalize_newlines(extract_optional_block(body, "Expected saved data"))
         data_directory_is_file = bool(re.search(r"(?m)^Data directory is a file:\s*$", body))
+        data_file_is_directory = bool(re.search(r"(?m)^Data file is a directory:\s*$", body))
         cases.append(TestCase(name, aim_match.group(1).strip(), inputs, expected, initial_data,
-                              expected_saved_data, data_directory_is_file))
+                              expected_saved_data, data_directory_is_file, data_file_is_directory))
     return cases
 
 
@@ -192,6 +194,8 @@ def run_case(case: TestCase, classes_dir: Path, main_class: str, timeout: float)
         data_file = working_dir / "data" / "ernest.txt"
         if case.data_directory_is_file:
             data_file.parent.write_text("", encoding="utf-8")
+        elif case.data_file_is_directory:
+            data_file.mkdir(parents=True)
         elif case.initial_data:
             data_file.parent.mkdir(parents=True)
             data_file.write_text(case.initial_data, encoding="utf-8")

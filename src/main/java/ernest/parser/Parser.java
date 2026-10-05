@@ -15,14 +15,26 @@ import ernest.exception.ErnestException;
 import ernest.task.Deadline;
 import ernest.task.Event;
 import ernest.task.Task;
+import ernest.task.TaskDateTime;
 import ernest.task.ToDo;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Locale;
 
 /**
  * Converts raw user input into commands that Ernest can execute.
  */
 public final class Parser {
+    /** Date-time format with compact time accepted for deadlines and events. */
+    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT_COMPACT =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm").withResolverStyle(ResolverStyle.STRICT);
+    /** Date-time format with colon-separated time accepted for deadlines and events. */
+    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT_COLON =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm").withResolverStyle(ResolverStyle.STRICT);
     private static final String COMMAND_BYE = "bye";
     private static final String COMMAND_LIST = "list";
     private static final String COMMAND_DELETE = "delete";
@@ -47,14 +59,19 @@ public final class Parser {
     private static final String ERROR_MISSING_DEADLINE_DESCRIPTION =
             "Missing deadline description. Please try again.";
     private static final String ERROR_MISSING_DEADLINE_DATE = "Missing deadline date. Please try again.";
-    private static final String ERROR_MISSING_EVENT_FROM_MARKER = "Event must include a /from time.";
-    private static final String ERROR_MISSING_EVENT_TO_MARKER = "Event must include a /to time.";
+    private static final String ERROR_INVALID_DEADLINE_DATE_TIME =
+            "Invalid deadline date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.";
+    private static final String ERROR_MISSING_EVENT_FROM_MARKER = "Event must include a /from date.";
+    private static final String ERROR_MISSING_EVENT_TO_MARKER = "Event must include a /to date.";
     private static final String ERROR_REVERSED_EVENT_MARKERS = "The /to marker must come after /from.";
     private static final String ERROR_MULTIPLE_EVENT_MARKERS =
             "Event may only contain one /from and one /to marker.";
     private static final String ERROR_MISSING_EVENT_DESCRIPTION = "Missing event description. Please try again.";
-    private static final String ERROR_MISSING_EVENT_START = "Missing event start time. Please try again.";
-    private static final String ERROR_MISSING_EVENT_END = "Missing event end time. Please try again.";
+    private static final String ERROR_MISSING_EVENT_START = "Missing event start date. Please try again.";
+    private static final String ERROR_MISSING_EVENT_END = "Missing event end date. Please try again.";
+    private static final String ERROR_INVALID_EVENT_DATE_TIME =
+            "Invalid event date or time. Please use yyyy-MM-dd with an optional HHmm or HH:mm time.";
+    private static final String ERROR_EVENT_END_BEFORE_START = "Event end cannot be before its start.";
     private static final String ERROR_MISSING_TASK_NUMBER =
             "Missing task number. Please refer to the task list and try again.";
     private static final String ERROR_NON_INTEGER_TASK_NUMBER = "Task number must be an integer.";
@@ -252,7 +269,11 @@ public final class Parser {
         if (deadline.isEmpty()) {
             throw new ErnestException(ERROR_MISSING_DEADLINE_DATE);
         }
-        return new Deadline(taskName, deadline);
+        try {
+            return new Deadline(taskName, parseDateTime(deadline));
+        } catch (DateTimeParseException exception) {
+            throw new ErnestException(ERROR_INVALID_DEADLINE_DATE_TIME);
+        }
     }
 
     /**
@@ -295,7 +316,32 @@ public final class Parser {
         if (durationEnd.isEmpty()) {
             throw new ErnestException(ERROR_MISSING_EVENT_END);
         }
-        return new Event(taskName, durationStart, durationEnd);
+        try {
+            TaskDateTime startDateTime = parseDateTime(durationStart);
+            TaskDateTime endDateTime = parseDateTime(durationEnd);
+            if (endDateTime.isBefore(startDateTime)) {
+                throw new ErnestException(ERROR_EVENT_END_BEFORE_START);
+            }
+            return new Event(taskName, startDateTime, endDateTime);
+        } catch (DateTimeParseException exception) {
+            throw new ErnestException(ERROR_INVALID_EVENT_DATE_TIME);
+        }
+    }
+
+    /**
+     * Returns a required date and optional time parsed from a supported format.
+     *
+     * @param dateTime date and optional time to parse.
+     * @return parsed date and optional time.
+     * @throws DateTimeParseException if the value is not valid date-time input.
+     */
+    private static TaskDateTime parseDateTime(String dateTime) {
+        if (!dateTime.contains(" ")) {
+            return new TaskDateTime(LocalDate.parse(dateTime));
+        }
+        DateTimeFormatter inputFormat = dateTime.contains(":")
+                ? INPUT_DATE_TIME_FORMAT_COLON : INPUT_DATE_TIME_FORMAT_COMPACT;
+        return new TaskDateTime(LocalDateTime.parse(dateTime, inputFormat));
     }
 
     /**
